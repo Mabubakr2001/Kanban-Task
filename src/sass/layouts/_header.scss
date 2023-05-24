@@ -1,7 +1,12 @@
-@use "../variables/colors";
+@use "../variables/colors" as c;
 
 header {
-  padding: 15px 20px;
+  padding: {
+    top: 15px;
+    bottom: 15px;
+    right: 20px;
+    left: 20px;
+  }
   display: flex;
   align-items: center;
   .logo-info {
@@ -10,7 +15,12 @@ header {
     width: 245px;
     > {
       div {
-        margin: -2px 10px 0 0;
+        margin: {
+          top: -2px;
+          right: 10px;
+          bottom: 0;
+          left: 0;
+        }
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -21,7 +31,7 @@ header {
             height: inherit;
             width: 8px;
             border-radius: 5px;
-            background-color: colors.$mainColor;
+            background-color: c.$mainColor;
           }
           div:nth-child(2) {
             opacity: 0.8;
@@ -46,17 +56,25 @@ header {
       display: flex;
       align-items: center;
       .add-task-btn {
-        background-color: colors.$mainColor;
+        background-color: c.$mainColor;
         border-radius: 20px;
         display: flex;
         align-items: center;
         padding: 12px 20px;
-        img {
-          margin-right: 5px;
-          width: 23px;
+        color: c.$whiteColor;
+        body[data-mode="dark"] &:hover {
+          background-color: c.$whiteColor;
+          color: c.$mainColor;
+          svg {
+            fill: c.$mainColor;
+          }
+        }
+        body[data-mode="light"] &:hover {
+          background-color: #9f84ff;
         }
         h3 {
           font-size: 18px;
+          font-weight: 700;
         }
       }
       .manipulating-spot {
@@ -71,7 +89,7 @@ header {
           width: inherit;
           height: 6px;
           border-radius: 50%;
-          background-color: colors.$subColor2;
+          background-color: c.$subColor2;
         }
       }
     }
