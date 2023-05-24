@@ -7,7 +7,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
-  <body>
-    <header></header>
+  <body data-mode="dark">
+    <header>
+      <div class="logo-info">
+        <div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <h1>Kanban</h1>
+      </div>
+      <div class="board-info">
+        <h2>Platform Launch</h2>
+        <div class="board-manipulation">
+          <button class="add-task-btn">
+            <img src="./assets/images/plus.svg" alt="" />
+            <h3>Add Task</h3>
+          </button>
+          <div class="manipulating-spot">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </header>
   </body>
 </html>

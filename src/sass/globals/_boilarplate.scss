@@ -1,0 +1,48 @@
+@use "../variables/colors";
+
+*,
+*::before,
+*::after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  min-height: 100vh;
+}
+
+body[data-mode="dark"] {
+  header {
+    background-color: colors.$subColor;
+    h1 {
+      color: colors.$whiteColor;
+    }
+    button {
+      color: colors.$whiteColor;
+    }
+    h2 {
+      color: colors.$whiteColor;
+    }
+  }
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+svg {
+  pointer-events: none;
+  user-select: none;
+}

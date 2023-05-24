@@ -1,0 +1,79 @@
+@use "../variables/colors";
+
+header {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  .logo-info {
+    display: flex;
+    align-items: center;
+    width: 245px;
+    > {
+      div {
+        margin: -2px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 30px;
+        width: 30px;
+        > {
+          div {
+            height: inherit;
+            width: 8px;
+            border-radius: 5px;
+            background-color: colors.$mainColor;
+          }
+          div:nth-child(2) {
+            opacity: 0.8;
+          }
+          div:last-child {
+            opacity: 0.6;
+          }
+        }
+      }
+      h1 {
+        font-size: 32px;
+        font-weight: 700;
+      }
+    }
+  }
+  .board-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    .board-manipulation {
+      display: flex;
+      align-items: center;
+      .add-task-btn {
+        background-color: colors.$mainColor;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        img {
+          margin-right: 5px;
+          width: 23px;
+        }
+        h3 {
+          font-size: 18px;
+        }
+      }
+      .manipulating-spot {
+        width: 6px;
+        height: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-left: 25px;
+        cursor: pointer;
+        > div {
+          width: inherit;
+          height: 6px;
+          border-radius: 50%;
+          background-color: colors.$subColor2;
+        }
+      }
+    }
+  }
+}
