@@ -17,18 +17,6 @@ body {
   min-height: 100vh;
 }
 
-body[data-mode="dark"] {
-  header {
-    background-color: colors.$subColor;
-    h1 {
-      color: colors.$whiteColor;
-    }
-    h2 {
-      color: colors.$whiteColor;
-    }
-  }
-}
-
 a {
   text-decoration: none;
 }
@@ -36,6 +24,7 @@ a {
 button {
   cursor: pointer;
   border: none;
+  outline: none;
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 

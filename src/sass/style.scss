@@ -1,3 +1,7 @@
 @forward "./globals";
 @forward "./variables";
 @forward "./layouts";
+
+.app-body {
+  display: flex;
+}

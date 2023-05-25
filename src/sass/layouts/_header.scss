@@ -1,11 +1,15 @@
 @use "../variables/colors" as c;
+@use "../variables/transitions" as t;
 
 header {
+  body[data-mode="dark"] & {
+    background-color: c.$subColor;
+    color: c.$whiteColor;
+  }
   padding: {
     top: 15px;
     bottom: 15px;
     right: 20px;
-    left: 20px;
   }
   display: flex;
   align-items: center;
@@ -13,6 +17,7 @@ header {
     display: flex;
     align-items: center;
     width: 245px;
+    padding-left: 20px;
     > {
       div {
         margin: {
@@ -44,6 +49,7 @@ header {
       h1 {
         font-size: 32px;
         font-weight: 700;
+        color: c.$subColor2;
       }
     }
   }
@@ -52,6 +58,9 @@ header {
     justify-content: space-between;
     align-items: center;
     flex: 1;
+    h2 {
+      color: c.$subColor2;
+    }
     .board-manipulation {
       display: flex;
       align-items: center;
@@ -62,6 +71,7 @@ header {
         align-items: center;
         padding: 12px 20px;
         color: c.$whiteColor;
+        transition: t.$mainTransition;
         body[data-mode="dark"] &:hover {
           background-color: c.$whiteColor;
           color: c.$mainColor;
@@ -70,7 +80,7 @@ header {
           }
         }
         body[data-mode="light"] &:hover {
-          background-color: #9f84ff;
+          background-color: c.$subColor;
         }
         h3 {
           font-size: 18px;
