@@ -9,7 +9,7 @@
   align-items: center;
   font-size: 18px;
   font-weight: 600;
-  // color: c.$whiteColor;
+  // color: c.$mainColor2;
   > {
     svg {
       margin: 0 2px 0 3px;
@@ -32,7 +32,7 @@
   }
   body[data-mode="dark"] & {
     background-color: c.$subColor;
-    // color: c.$whiteColor;
+    // color: c.$mainColor2;
   }
   > {
     p {
@@ -45,11 +45,11 @@
     }
   }
   .all-boards {
-    height: 400px;
+    min-height: fit-content;
+    max-height: 400px;
     overflow-y: scroll;
     &::-webkit-scrollbar {
       width: 12px;
-      background-color: c.$subColor2;
       border-radius: 15px;
     }
     &::-webkit-scrollbar-thumb {
@@ -66,11 +66,19 @@
       cursor: pointer;
       &[data-state="active"] {
         background-color: c.$mainColor;
-        color: c.$whiteColor;
+        color: c.$mainColor2;
       }
-      &:hover {
-        background-color: c.$mainColor;
-        color: c.$whiteColor;
+      body[data-mode="dark"] &:not([data-state="active"]) {
+        &:hover {
+          background-color: c.$mainColor2;
+          color: c.$mainColor;
+        }
+      }
+      body[data-mode="light"] &:not([data-state="active"]) {
+        &:hover {
+          background-color: c.$subColor;
+          color: c.$mainColor2;
+        }
       }
       h3 {
         font-size: 18px;
@@ -89,16 +97,16 @@
   .board-creation-btn {
     @extend %rounded-shape;
     transition: t.$mainTransition;
-    margin-top: 10px;
+    margin-top: 1px;
     width: calc(92% - 12px);
     body[data-mode="dark"] & {
       background-color: c.$mainColor;
-      color: c.$whiteColor;
+      color: c.$mainColor2;
       svg {
-        fill: c.$whiteColor;
+        fill: c.$mainColor2;
       }
       &:hover {
-        background-color: c.$whiteColor;
+        background-color: c.$mainColor2;
         color: c.$mainColor;
         svg {
           fill: c.$mainColor;
@@ -107,12 +115,12 @@
     }
     body[data-mode="light"] & {
       background-color: c.$mainColor;
-      color: c.$whiteColor;
+      color: c.$mainColor2;
       &:hover {
         background-color: c.$subColor;
       }
       svg {
-        fill: c.$whiteColor;
+        fill: c.$mainColor2;
       }
     }
   }
@@ -131,16 +139,33 @@
       border-radius: 15px;
       background-color: c.$mainColor;
       margin: 0 25px;
-      padding: 0 3px;
-      display: flex;
-      align-items: center;
+      position: relative;
       cursor: pointer;
       transition: t.$mainTransition;
+      &:hover {
+        background-color: #9f84ff;
+      }
       > div {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
         height: 14px;
         width: 14px;
         border-radius: 50%;
-        background-color: c.$whiteColor;
+        transition: t.$mainTransition;
+        background-color: c.$mainColor2;
+        pointer-events: none;
+        user-select: none;
+      }
+      &[data-current-mode="light"] {
+        > div {
+          left: 3px;
+        }
+      }
+      &[data-current-mode="dark"] {
+        > div {
+          right: 3px;
+        }
       }
     }
   }
@@ -154,12 +179,12 @@
     }
     body[data-mode="dark"] & {
       background-color: c.$mainColor;
-      color: c.$whiteColor;
+      color: c.$mainColor2;
       svg {
-        fill: c.$whiteColor;
+        fill: c.$mainColor2;
       }
       &:hover {
-        background-color: c.$whiteColor;
+        background-color: c.$mainColor2;
         color: c.$mainColor;
         svg {
           fill: c.$mainColor;
@@ -167,13 +192,13 @@
       }
     }
     body[data-mode="light"] & {
-      background-color: c.$subColor;
-      color: c.$whiteColor;
+      background-color: c.$mainColor;
+      color: c.$mainColor2;
       &:hover {
-        background-color: c.$mainColor;
+        background-color: c.$subColor;
       }
       svg {
-        fill: c.$whiteColor;
+        fill: c.$mainColor2;
       }
     }
   }

@@ -4,7 +4,7 @@
 header {
   body[data-mode="dark"] & {
     background-color: c.$subColor;
-    color: c.$whiteColor;
+    color: c.$mainColor2;
   }
   padding: {
     top: 15px;
@@ -70,10 +70,10 @@ header {
         display: flex;
         align-items: center;
         padding: 12px 20px;
-        color: c.$whiteColor;
+        color: c.$mainColor2;
         transition: t.$mainTransition;
         body[data-mode="dark"] &:hover {
-          background-color: c.$whiteColor;
+          background-color: c.$mainColor2;
           color: c.$mainColor;
           svg {
             fill: c.$mainColor;
