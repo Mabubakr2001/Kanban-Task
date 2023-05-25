@@ -9,7 +9,6 @@
   align-items: center;
   font-size: 18px;
   font-weight: 600;
-  // color: c.$mainColor2;
   > {
     svg {
       margin: 0 2px 0 3px;
@@ -32,7 +31,6 @@
   }
   body[data-mode="dark"] & {
     background-color: c.$subColor;
-    // color: c.$mainColor2;
   }
   > {
     p {
