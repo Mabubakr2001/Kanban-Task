@@ -1,5 +1,6 @@
 @use "../variables/transitions" as t;
 @use "../variables/colors" as c;
+@use "../globals/functions" as *;
 @use "sass:math";
 
 %rounded-shape {
@@ -20,32 +21,32 @@
 .board-creation {
   height: calc(100vh - 77px);
   width: 0;
-  padding: 15px 0;
+  padding: rem(15px) 0;
   overflow: hidden;
   @at-root &[data-state="visible"] {
     display: flex;
     flex-direction: column;
-    width: 245px;
+    width: rem(245px);
   }
   @at-root &[data-state="hidden"] {
     display: none;
   }
   @at-root body[data-mode="dark"] & {
-    background-color: c.$subColor;
+    background-color: map-get(c.$colors, "sub");
   }
   > {
     p {
-      margin: 0 0 20px 20px;
+      margin: 0 0 rem(20px) rem(20px);
       color: #828d9c;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-size: 15px;
+      font-size: rem(15px);
       font-weight: 600;
     }
   }
   .all-boards {
     min-height: fit-content;
-    max-height: 400px;
+    max-height: rem(400px);
     overflow-y: scroll;
     @at-root &::-webkit-scrollbar {
       width: 12px;
@@ -53,7 +54,7 @@
     }
     @at-root &::-webkit-scrollbar-thumb {
       border-radius: 15px;
-      background-color: c.$mainColor;
+      background-color: map-get(c.$colors, "main");
     }
     .created-board-name {
       @extend %rounded-shape;
@@ -61,26 +62,26 @@
       @at-root &:not(:last-child) {
         margin-bottom: 1px;
       }
-      color: c.$mainColor;
+      color: map-get(c.$colors, "main");
       cursor: pointer;
       @at-root &[data-state="active"] {
-        background-color: c.$mainColor;
-        color: c.$mainColor2;
+        background-color: map-get(c.$colors, "main");
+        color: map-get(c.$colors, "main_2");
       }
       @at-root body[data-mode="dark"] &:not([data-state="active"]) {
         &:hover {
-          background-color: c.$mainColor2;
-          color: c.$mainColor;
+          background-color: map-get(c.$colors, "main_2");
+          color: map-get(c.$colors, "main");
         }
       }
       @at-root body[data-mode="light"] &:not([data-state="active"]) {
         &:hover {
           background-color: c.$subColor;
-          color: c.$mainColor2;
+          color: map-get(c.$colors, "main_2");
         }
       }
       h3 {
-        font-size: 18px;
+        font-size: rem(18px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -99,27 +100,27 @@
     margin-top: 1px;
     width: calc(92% - 12px);
     @at-root body[data-mode="dark"] & {
-      background-color: c.$mainColor;
-      color: c.$mainColor2;
+      background-color: map-get(c.$colors, "main");
+      color: map-get(c.$colors, "main_2");
       svg {
-        fill: c.$mainColor2;
+        fill: map-get(c.$colors, "main_2");
       }
       &:hover {
-        background-color: c.$mainColor2;
-        color: c.$mainColor;
+        background-color: map-get(c.$colors, "main_2");
+        color: map-get(c.$colors, "main");
         svg {
-          fill: c.$mainColor;
+          fill: map-get(c.$colors, "main");
         }
       }
     }
     @at-root body[data-mode="light"] & {
-      background-color: c.$mainColor;
-      color: c.$mainColor2;
+      background-color: map-get(c.$colors, "main");
+      color: map-get(c.$colors, "main_2");
       &:hover {
-        background-color: c.$subColor;
+        background-color: map-get(c.$colors, "sub");
       }
       svg {
-        fill: c.$mainColor2;
+        fill: map-get(c.$colors, "main_2");
       }
     }
   }
@@ -128,16 +129,16 @@
     justify-content: center;
     align-items: center;
     border-radius: 7px;
-    background-color: c.$subColor3;
+    background-color: map-get(c.$colors, "sub_3");
     width: 88%;
-    height: 41px;
-    margin: auto auto 15px;
+    height: rem(41px);
+    margin: auto auto rem(15px);
     .toggle-mode {
-      width: 40px;
-      height: 20px;
+      width: rem(40px);
+      height: rem(20px);
       border-radius: 15px;
-      background-color: c.$mainColor;
-      margin: 0 25px;
+      background-color: map-get(c.$colors, "main");
+      margin: 0 rem(25px);
       position: relative;
       cursor: pointer;
       transition: t.$mainTransition;
@@ -148,11 +149,11 @@
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        height: 14px;
-        width: 14px;
+        height: rem(14px);
+        width: rem(14px);
         border-radius: 50%;
         transition: t.$mainTransition;
-        background-color: c.$mainColor2;
+        background-color: map-get(c.$colors, "main_2");
         pointer-events: none;
         user-select: none;
       }
@@ -177,27 +178,27 @@
       user-select: none;
     }
     @at-root body[data-mode="dark"] & {
-      background-color: c.$mainColor;
-      color: c.$mainColor2;
+      background-color: map-get(c.$colors, "main");
+      color: map-get(c.$colors, "main_2");
       svg {
-        fill: c.$mainColor2;
+        fill: map-get(c.$colors, "main_2");
       }
       &:hover {
-        background-color: c.$mainColor2;
-        color: c.$mainColor;
+        background-color: map-get(c.$colors, "main_2");
+        color: map-get(c.$colors, "main");
         svg {
-          fill: c.$mainColor;
+          fill: map-get(c.$colors, "main");
         }
       }
     }
     @at-root body[data-mode="light"] & {
-      background-color: c.$mainColor;
-      color: c.$mainColor2;
+      background-color: map-get(c.$colors, "main");
+      color: map-get(c.$colors, "main_2");
       &:hover {
-        background-color: c.$subColor;
+        background-color: map-get(c.$colors, "sub");
       }
       svg {
-        fill: c.$mainColor2;
+        fill: map-get(c.$colors, "main_2");
       }
     }
   }
