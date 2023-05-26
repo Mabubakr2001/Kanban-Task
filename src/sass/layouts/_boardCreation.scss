@@ -1,13 +1,14 @@
 @use "../variables/transitions" as t;
 @use "../variables/colors" as c;
+@use "sass:math";
 
 %rounded-shape {
   width: 92%;
-  height: 47px;
+  height: rem(47px);
   border-radius: 0 25px 25px 0;
   display: flex;
   align-items: center;
-  font-size: 18px;
+  font-size: rem(18px);
   font-weight: 600;
   > {
     svg {
@@ -21,15 +22,15 @@
   width: 0;
   padding: 15px 0;
   overflow: hidden;
-  &[data-state="visible"] {
+  @at-root &[data-state="visible"] {
     display: flex;
     flex-direction: column;
     width: 245px;
   }
-  &[data-state="hidden"] {
+  @at-root &[data-state="hidden"] {
     display: none;
   }
-  body[data-mode="dark"] & {
+  @at-root body[data-mode="dark"] & {
     background-color: c.$subColor;
   }
   > {
@@ -46,33 +47,33 @@
     min-height: fit-content;
     max-height: 400px;
     overflow-y: scroll;
-    &::-webkit-scrollbar {
+    @at-root &::-webkit-scrollbar {
       width: 12px;
       border-radius: 15px;
     }
-    &::-webkit-scrollbar-thumb {
+    @at-root &::-webkit-scrollbar-thumb {
       border-radius: 15px;
       background-color: c.$mainColor;
     }
     .created-board-name {
       @extend %rounded-shape;
       transition: t.$mainTransition;
-      &:not(:last-child) {
+      @at-root &:not(:last-child) {
         margin-bottom: 1px;
       }
       color: c.$mainColor;
       cursor: pointer;
-      &[data-state="active"] {
+      @at-root &[data-state="active"] {
         background-color: c.$mainColor;
         color: c.$mainColor2;
       }
-      body[data-mode="dark"] &:not([data-state="active"]) {
+      @at-root body[data-mode="dark"] &:not([data-state="active"]) {
         &:hover {
           background-color: c.$mainColor2;
           color: c.$mainColor;
         }
       }
-      body[data-mode="light"] &:not([data-state="active"]) {
+      @at-root body[data-mode="light"] &:not([data-state="active"]) {
         &:hover {
           background-color: c.$subColor;
           color: c.$mainColor2;
@@ -97,7 +98,7 @@
     transition: t.$mainTransition;
     margin-top: 1px;
     width: calc(92% - 12px);
-    body[data-mode="dark"] & {
+    @at-root body[data-mode="dark"] & {
       background-color: c.$mainColor;
       color: c.$mainColor2;
       svg {
@@ -111,7 +112,7 @@
         }
       }
     }
-    body[data-mode="light"] & {
+    @at-root body[data-mode="light"] & {
       background-color: c.$mainColor;
       color: c.$mainColor2;
       &:hover {
@@ -140,7 +141,7 @@
       position: relative;
       cursor: pointer;
       transition: t.$mainTransition;
-      &:hover {
+      @at-root &:hover {
         background-color: #9f84ff;
       }
       > div {
@@ -155,12 +156,12 @@
         pointer-events: none;
         user-select: none;
       }
-      &[data-current-mode="light"] {
+      @at-root &[data-current-mode="light"] {
         > div {
           left: 3px;
         }
       }
-      &[data-current-mode="dark"] {
+      @at-root &[data-current-mode="dark"] {
         > div {
           right: 3px;
         }
@@ -175,7 +176,7 @@
       pointer-events: none;
       user-select: none;
     }
-    body[data-mode="dark"] & {
+    @at-root body[data-mode="dark"] & {
       background-color: c.$mainColor;
       color: c.$mainColor2;
       svg {
@@ -189,7 +190,7 @@
         }
       }
     }
-    body[data-mode="light"] & {
+    @at-root body[data-mode="light"] & {
       background-color: c.$mainColor;
       color: c.$mainColor2;
       &:hover {
