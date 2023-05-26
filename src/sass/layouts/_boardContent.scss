@@ -3,12 +3,15 @@
 .board-content {
   width: calc(100vw - 245px);
   height: calc(100vh - 77px);
+  @at-root .board-creation[data-state="hidden"] ~ & {
+    width: 100vw;
+  }
 
   @at-root body[data-mode="light"] & {
-    background-color: c.$mainColor3;
+    background-color: map-get(c.$colors, main_3);
   }
 
   @at-root body[data-mode="dark"] & {
-    background-color: c.$subColor3;
+    background-color: map-get(c.$colors, sub_3);
   }
 }

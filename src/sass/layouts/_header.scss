@@ -1,10 +1,11 @@
 @use "../variables/colors" as c;
 @use "../variables/transitions" as t;
+@use "../globals/functions" as *;
 
 header {
   @at-root body[data-mode="dark"] & {
-    background-color: c.$subColor;
-    color: c.$mainColor2;
+    background-color: map-get(c.$colors, sub);
+    color: map-get(c.$colors, main_2);
   }
   padding: {
     top: 15px;
@@ -16,8 +17,8 @@ header {
   .logo-info {
     display: flex;
     align-items: center;
-    width: 245px;
-    padding-left: 20px;
+    width: rem(245px);
+    padding-left: rem(20px);
     > {
       div {
         margin: {
@@ -29,14 +30,14 @@ header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        height: 30px;
-        width: 30px;
+        height: rem(30px);
+        width: rem(30px);
         > {
           div {
             height: inherit;
             width: 8px;
             border-radius: 5px;
-            background-color: c.$mainColor;
+            background-color: map-get(c.$colors, main);
           }
           div:nth-child(2) {
             opacity: 0.8;
@@ -47,7 +48,7 @@ header {
         }
       }
       h1 {
-        font-size: 32px;
+        font-size: rem(32px);
         font-weight: 700;
       }
     }
@@ -61,41 +62,41 @@ header {
       display: flex;
       align-items: center;
       .add-task-btn {
-        background-color: c.$mainColor;
+        background-color: map-get(c.$colors, main);
         border-radius: 20px;
         display: flex;
         align-items: center;
-        padding: 12px 20px;
-        color: c.$mainColor2;
+        padding: rem(12px) rem(20px);
+        color: map-get(c.$colors, main_2);
         transition: t.$mainTransition;
         @at-root body[data-mode="dark"] &:hover {
-          background-color: c.$mainColor2;
-          color: c.$mainColor;
+          background-color: map-get(c.$colors, main_2);
+          color: map-get(c.$colors, main);
           svg {
-            fill: c.$mainColor;
+            fill: map-get(c.$colors, main);
           }
         }
         @at-root body[data-mode="light"] &:hover {
-          background-color: c.$subColor;
+          background-color: map-get(c.$colors, sub);
         }
         h3 {
-          font-size: 18px;
+          font-size: rem(18px);
           font-weight: 700;
         }
       }
       .manipulating-spot {
-        width: 6px;
-        height: 24px;
+        width: rem(6px);
+        height: rem(24px);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        margin-left: 25px;
+        margin-left: rem(25px);
         cursor: pointer;
         > div {
           width: inherit;
           height: 6px;
           border-radius: 50%;
-          background-color: c.$subColor2;
+          background-color: map-get(c.$colors, sub_2);
         }
       }
     }

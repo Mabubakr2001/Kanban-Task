@@ -32,7 +32,7 @@
     display: none;
   }
   @at-root body[data-mode="dark"] & {
-    background-color: map-get(c.$colors, "sub");
+    background-color: map-get(c.$colors, sub);
   }
   > {
     p {
@@ -54,7 +54,7 @@
     }
     @at-root &::-webkit-scrollbar-thumb {
       border-radius: 15px;
-      background-color: map-get(c.$colors, "main");
+      background-color: map-get(c.$colors, main);
     }
     .created-board-name {
       @extend %rounded-shape;
@@ -62,22 +62,22 @@
       @at-root &:not(:last-child) {
         margin-bottom: 1px;
       }
-      color: map-get(c.$colors, "main");
+      color: map-get(c.$colors, main);
       cursor: pointer;
       @at-root &[data-state="active"] {
-        background-color: map-get(c.$colors, "main");
-        color: map-get(c.$colors, "main_2");
+        background-color: map-get(c.$colors, main);
+        color: map-get(c.$colors, main_2);
       }
       @at-root body[data-mode="dark"] &:not([data-state="active"]) {
         &:hover {
-          background-color: map-get(c.$colors, "main_2");
-          color: map-get(c.$colors, "main");
+          background-color: map-get(c.$colors, main_2);
+          color: map-get(c.$colors, main);
         }
       }
       @at-root body[data-mode="light"] &:not([data-state="active"]) {
         &:hover {
-          background-color: c.$subColor;
-          color: map-get(c.$colors, "main_2");
+          background-color: map-get(c.$colors, sub);
+          color: map-get(c.$colors, main_2);
         }
       }
       h3 {
@@ -85,7 +85,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin-right: 10px;
+        margin-right: rem(10px);
       }
       svg {
         margin: -2px 10px 0 7px;
@@ -100,27 +100,27 @@
     margin-top: 1px;
     width: calc(92% - 12px);
     @at-root body[data-mode="dark"] & {
-      background-color: map-get(c.$colors, "main");
-      color: map-get(c.$colors, "main_2");
+      background-color: map-get(c.$colors, main);
+      color: map-get(c.$colors, main_2);
       svg {
-        fill: map-get(c.$colors, "main_2");
+        fill: map-get(c.$colors, main_2);
       }
       &:hover {
-        background-color: map-get(c.$colors, "main_2");
-        color: map-get(c.$colors, "main");
+        background-color: map-get(c.$colors, main_2);
+        color: map-get(c.$colors, main);
         svg {
-          fill: map-get(c.$colors, "main");
+          fill: map-get(c.$colors, main);
         }
       }
     }
     @at-root body[data-mode="light"] & {
-      background-color: map-get(c.$colors, "main");
-      color: map-get(c.$colors, "main_2");
+      background-color: map-get(c.$colors, main);
+      color: map-get(c.$colors, main_2);
       &:hover {
-        background-color: map-get(c.$colors, "sub");
+        background-color: map-get(c.$colors, sub);
       }
       svg {
-        fill: map-get(c.$colors, "main_2");
+        fill: map-get(c.$colors, main_2);
       }
     }
   }
@@ -129,7 +129,7 @@
     justify-content: center;
     align-items: center;
     border-radius: 7px;
-    background-color: map-get(c.$colors, "sub_3");
+    background-color: map-get(c.$colors, sub_3);
     width: 88%;
     height: rem(41px);
     margin: auto auto rem(15px);
@@ -137,7 +137,7 @@
       width: rem(40px);
       height: rem(20px);
       border-radius: 15px;
-      background-color: map-get(c.$colors, "main");
+      background-color: map-get(c.$colors, main);
       margin: 0 rem(25px);
       position: relative;
       cursor: pointer;
@@ -153,7 +153,7 @@
         width: rem(14px);
         border-radius: 50%;
         transition: t.$mainTransition;
-        background-color: map-get(c.$colors, "main_2");
+        background-color: map-get(c.$colors, main_2);
         pointer-events: none;
         user-select: none;
       }
@@ -173,32 +173,32 @@
     @extend %rounded-shape;
     transition: t.$mainTransition;
     svg {
-      margin: -2px 10px 0 7px;
+      margin: -2px rem(10px) 0 rem(7px);
       pointer-events: none;
       user-select: none;
     }
     @at-root body[data-mode="dark"] & {
-      background-color: map-get(c.$colors, "main");
-      color: map-get(c.$colors, "main_2");
+      background-color: map-get(c.$colors, main);
+      color: map-get(c.$colors, main_2);
       svg {
-        fill: map-get(c.$colors, "main_2");
+        fill: map-get(c.$colors, main_2);
       }
       &:hover {
-        background-color: map-get(c.$colors, "main_2");
-        color: map-get(c.$colors, "main");
+        background-color: map-get(c.$colors, main_2);
+        color: map-get(c.$colors, main);
         svg {
-          fill: map-get(c.$colors, "main");
+          fill: map-get(c.$colors, main);
         }
       }
     }
     @at-root body[data-mode="light"] & {
-      background-color: map-get(c.$colors, "main");
-      color: map-get(c.$colors, "main_2");
+      background-color: map-get(c.$colors, main);
+      color: map-get(c.$colors, main_2);
       &:hover {
-        background-color: map-get(c.$colors, "sub");
+        background-color: map-get(c.$colors, sub);
       }
       svg {
-        fill: map-get(c.$colors, "main_2");
+        fill: map-get(c.$colors, main_2);
       }
     }
   }

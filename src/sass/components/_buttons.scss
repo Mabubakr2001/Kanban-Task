@@ -1,0 +1,27 @@
+@use "../variables/colors" as c;
+@use "../variables/transitions" as t;
+
+.show-sidebar-btn {
+  position: absolute;
+  bottom: 15px;
+  left: 0;
+  height: 47px;
+  width: 55px;
+  border-radius: 0 25px 25px 0;
+  background-color: map-get(c.$colors, main);
+  color: map-get(c.$colors, main_2);
+  transition: t.$mainTransition;
+  @at-root body[data-mode="light"] &:hover {
+    background-color: map-get(c.$colors, sub);
+  }
+  @at-root body[data-mode="dark"] &:hover {
+    background-color: map-get(c.$colors, main_2);
+    color: map-get(c.$colors, main);
+  }
+  &[data-state="hidden"] {
+    display: none;
+  }
+  &[data-state="visible"] {
+    display: inline-block;
+  }
+}
