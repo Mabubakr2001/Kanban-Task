@@ -1,8 +1,30 @@
 @use "../variables/colors" as c;
+@use "../globals/functions" as *;
 
 .board-content {
   width: calc(100vw - 245px);
   height: calc(100vh - 77px);
+  padding: rem(25px);
+  position: relative;
+  @at-root body[data-mode="dark"] & {
+    border-top: 1px solid #3e3f4e;
+  }
+  @at-root body[data-mode="light"] & {
+    border-top: 1px solid #e2e2e2;
+  }
+  .hint {
+    text-align: center;
+    margin-top: 25%;
+    font-size: rem(25px);
+    @at-root body[data-mode="dark"] & {
+      color: map-get(c.$colors, main_2);
+    }
+    span {
+      color: map-get(c.$colors, main);
+      font-weight: 600;
+    }
+  }
+
   @at-root .board-creation[data-state="hidden"] ~ & {
     width: 100vw;
   }

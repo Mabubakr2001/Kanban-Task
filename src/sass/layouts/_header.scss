@@ -7,18 +7,21 @@ header {
     background-color: map-get(c.$colors, sub);
     color: map-get(c.$colors, main_2);
   }
-  padding: {
-    top: 15px;
-    bottom: 15px;
-    right: 20px;
-  }
   display: flex;
   align-items: center;
+  height: rem(77px);
   .logo-info {
     display: flex;
     align-items: center;
     width: rem(245px);
+    height: 100%;
     padding-left: rem(20px);
+    @at-root body[data-mode="dark"] & {
+      border-right: 1px solid #3e3f4e;
+    }
+    @at-root body[data-mode="light"] & {
+      border-right: 1px solid #e2e2e2;
+    }
     > {
       div {
         margin: {
@@ -48,7 +51,7 @@ header {
         }
       }
       h1 {
-        font-size: rem(32px);
+        font-size: rem(28px);
         font-weight: 700;
       }
     }
@@ -58,9 +61,19 @@ header {
     justify-content: space-between;
     align-items: center;
     flex: 1;
+    padding: {
+      top: 15px;
+      bottom: 15px;
+      right: 20px;
+      left: 20px;
+    }
+    h2 {
+      font-size: rem(22px);
+    }
     .board-manipulation {
       display: flex;
       align-items: center;
+      margin-left: auto;
       .add-task-btn {
         background-color: map-get(c.$colors, main);
         border-radius: 20px;

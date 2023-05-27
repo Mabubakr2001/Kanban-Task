@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
-  <body data-mode="dark">
+  <body data-mode="light">
     <header>
       <div class="logo-info">
         <div>
@@ -18,7 +18,7 @@
         <h1>Kanban</h1>
       </div>
       <div class="board-info">
-        <h2>Platform Launch</h2>
+        <!-- <h2 class="board-title">Platform Launch</h2> -->
         <div class="board-manipulation">
           <button class="add-task-btn">
             <svg
@@ -107,7 +107,7 @@
           Hide Sidebar
         </button>
       </div>
-      <button class="show-sidebar-btn" title="Show Sidebar" data-state="hidden">
+      <!-- <button class="show-sidebar-btn" title="Show Sidebar" data-state="hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="20"
@@ -123,9 +123,12 @@
             d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
           />
         </svg>
-      </button>
+      </button> -->
       <div class="board-content">
-        <p>Hello world</p>
+        <p class="hint">
+          There are no columns, click <span>Create New Board</span> on the left
+          side to start!
+        </p>
       </div>
     </section>
   </body>

@@ -18,10 +18,4 @@
     background-color: map-get(c.$colors, main_2);
     color: map-get(c.$colors, main);
   }
-  &[data-state="hidden"] {
-    display: none;
-  }
-  &[data-state="visible"] {
-    display: inline-block;
-  }
 }

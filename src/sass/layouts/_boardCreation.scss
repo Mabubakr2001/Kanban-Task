@@ -33,6 +33,12 @@
   }
   @at-root body[data-mode="dark"] & {
     background-color: map-get(c.$colors, sub);
+    border-right: 1px solid #3e3f4e;
+    border-top: 1px solid #3e3f4e;
+  }
+  @at-root body[data-mode="light"] & {
+    border-right: 1px solid #e2e2e2;
+    border-top: 1px solid #e2e2e2;
   }
   > {
     p {
@@ -40,7 +46,7 @@
       color: #828d9c;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-size: rem(15px);
+      font-size: rem(14px);
       font-weight: 600;
     }
   }
