@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
-  <body data-mode="light">
+  <body data-mode="dark">
     <header>
       <div class="logo-info">
         <div>
@@ -20,7 +20,7 @@
       <div class="board-info">
         <!-- <h2 class="board-title">Platform Launch</h2> -->
         <div class="board-manipulation">
-          <button class="add-task-btn">
+          <button class="add-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="23"
@@ -47,7 +47,7 @@
       <div class="board-creation" data-state="visible">
         <p>All Boards<span class="boards-num"> (0)</span></p>
         <div class="all-boards">
-          <!-- <div class="created-board-name" data-state="active">
+          <div class="created-board-name" data-state="active">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -61,7 +61,7 @@
               />
             </svg>
             <h3>Platform Launch And Here we</h3>
-          </div> -->
+          </div>
         </div>
         <button class="board-creation-btn">
           <svg
@@ -131,5 +131,35 @@
         </p>
       </div>
     </section>
+    <div class="get-info-window">
+      <h3>Add New Board</h3>
+      <div class="normal-input">
+        <h4>Board Name</h4>
+        <input type="text" data-state="normal" />
+      </div>
+      <div class="editable-input">
+        <h4>Board Columns</h4>
+        <div class="editable-input-content">
+          <input type="text" data-state="normal" />
+          <img src="./assets/images/x-lg.svg" alt="" />
+        </div>
+      </div>
+      <button class="add-column-btn">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="25"
+          fill="#fff"
+          class="bi bi-plus"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+          />
+        </svg>
+        Add New Column
+      </button>
+      <button>Create New Board</button>
+    </div>
   </body>
 </html>

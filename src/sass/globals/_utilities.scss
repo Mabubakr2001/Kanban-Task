@@ -1,0 +1,107 @@
+@use "./functions" as *;
+@use "../variables/colors" as c;
+@use "../variables/transitions" as t;
+
+.add-btn {
+  background-color: map-get(c.$colors, main);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: rem(12px) rem(20px);
+  color: map-get(c.$colors, main_2);
+  transition: t.$mainTransition;
+  @at-root body[data-mode="dark"] &:hover {
+    background-color: map-get(c.$colors, main_2);
+    color: map-get(c.$colors, main);
+    svg {
+      fill: map-get(c.$colors, main);
+    }
+  }
+  @at-root body[data-mode="light"] &:hover {
+    background-color: map-get(c.$colors, sub);
+  }
+  h3 {
+    font-size: rem(18px);
+    font-weight: 700;
+  }
+}
+
+.get-info-window {
+  padding: rem(30px);
+  font-weight: 700;
+  // overflow-y: scroll;
+  width: rem(480px);
+  height: fit-content;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  h3 {
+    margin-bottom: rem(20px);
+  }
+  @at-root body[data-mode="light"] & {
+    background-color: map-get(c.$colors, main_2);
+    color: map-get(c.$colors, blackColor);
+    box-shadow: 0 0 5px 0 rgb(200, 200, 200);
+  }
+  @at-root body[data-mode="dark"] & {
+    background-color: map-get(c.$colors, sub);
+    color: map-get(c.$colors, main_2);
+    box-shadow: 0 0 5px 0 rgb(37, 37, 37);
+  }
+  @at-root .normal-input {
+    margin: rem(20px) 0;
+    > {
+      h4 {
+        margin-bottom: rem(10px);
+        font-size: rem(15px);
+      }
+      input {
+        width: 100%;
+        height: rem(40px);
+        padding: 0 rem(15px);
+        border-radius: 5px;
+      }
+    }
+  }
+  @at-root .editable-input {
+    > {
+      h4 {
+        margin-bottom: rem(10px);
+        font-size: rem(15px);
+      }
+    }
+    .editable-input-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: rem(40px);
+      > {
+        input {
+          width: 90%;
+          height: 100%;
+          border-radius: 5px;
+          padding: 0 rem(15px);
+        }
+        img {
+          width: 30px;
+          height: 30px;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+  button {
+    @extend .add-btn !optional;
+    width: 90%;
+    margin: 0 auto;
+    height: 45px;
+    justify-content: center;
+    font-size: rem(17px);
+    padding: 0;
+    &:nth-child(4) {
+      margin: rem(15px) auto;
+    }
+  }
+}

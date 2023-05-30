@@ -74,7 +74,7 @@ header {
       display: flex;
       align-items: center;
       margin-left: auto;
-      .add-task-btn {
+      @at-root .add-btn {
         background-color: map-get(c.$colors, main);
         border-radius: 20px;
         display: flex;

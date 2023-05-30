@@ -1,7 +1,9 @@
 import "../sass/style.scss";
+import Board from "./board";
 const boardCreationSpot = document.querySelector(".board-creation");
 const hideSidebarBtn = document.querySelector(".hide-sidebar-btn");
 const toggleModeSpot = document.querySelector(".toggle-mode");
+const boardCreationBtn = document.querySelector(".board-creation-btn");
 
 function createShowModeBtn() {
   const element = `
@@ -63,4 +65,5 @@ function observeMutation() {
   });
 }
 
+boardCreationBtn.addEventListener("click", () => new Board());
 observeMutation();
