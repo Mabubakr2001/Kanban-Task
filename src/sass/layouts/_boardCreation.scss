@@ -54,13 +54,16 @@
     min-height: fit-content;
     max-height: rem(400px);
     overflow-y: scroll;
-    @at-root &::-webkit-scrollbar {
+    @at-root ::-webkit-scrollbar {
       width: 12px;
       border-radius: 15px;
     }
-    @at-root &::-webkit-scrollbar-thumb {
+    @at-root ::-webkit-scrollbar-thumb {
       border-radius: 15px;
       background-color: map-get(c.$colors, main);
+    }
+    @at-root ::-webkit-scrollbar-thumb:hover {
+      background-color: #6957aa;
     }
     .created-board-name {
       @extend %rounded-shape;

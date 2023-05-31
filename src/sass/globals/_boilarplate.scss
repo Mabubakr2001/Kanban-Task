@@ -63,5 +63,5 @@ input[data-state="empty"] {
 }
 
 input[data-state="allowed"] {
-  border: 1px solid green;
+  border: 1px solid map-get(c.$colors, main);
 }
