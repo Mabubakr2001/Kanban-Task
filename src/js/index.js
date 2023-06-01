@@ -6,8 +6,9 @@ const toggleModeSpot = document.querySelector(".toggle-mode");
 const boardCreationBtn = document.querySelector(".board-creation-btn");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
+const allBoards = [];
 
-function createElement(elementType) {
+function createElement(elementType, parentElementToInsert) {
   let element;
   switch (elementType) {
     case "sidebar-btn":
@@ -40,16 +41,16 @@ function createElement(elementType) {
       <h3>Add New Board</h3>
       <div class="normal-input">
         <h4>Board Name</h4>
-        <input type="text" data-state="normal" class="actual-normal-input"/>
+        <input type="text" data-state="normal" class="actual-normal-input" value=""/>
       </div>
       <div class="editable-input">
         <h4>Board Columns</h4>
         <div class="editable-input-content">
-          <input type="text" data-state="normal" />
-          <img src="./assets/images/x-lg.svg" alt="" />
+          <input type="text" data-state="normal" class="actual-editable-input" value=""/>
+          <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
         </div>
       </div>
-      <button class="add-column-btn">
+      <button class="add-new-editable-input-content-btn">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="25"
@@ -68,10 +69,17 @@ function createElement(elementType) {
      </div>
       `;
       break;
+    case "new-editable-input-content":
+      element = `
+       <div class="editable-input-content">
+        <input type="text" data-state="normal" class="actual-editable-input" value=""/>
+        <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
+       </div>
+       `;
     default:
       break;
   }
-  document.body.insertAdjacentHTML("beforeend", element);
+  parentElementToInsert.insertAdjacentHTML("beforeend", element);
 }
 
 function createErrorMessage(textToPut) {
@@ -83,7 +91,7 @@ function createErrorMessage(textToPut) {
 
 hideSidebarBtn.addEventListener("click", () => {
   boardCreationSpot.dataset.state = "hidden";
-  createElement("sidebar-btn");
+  createElement("sidebar-btn", document.body);
 });
 
 toggleModeSpot.addEventListener("click", ({ target }) => {
@@ -99,37 +107,12 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
 });
 
 boardCreationBtn.addEventListener("click", () => {
-  createElement("board-creation-window");
-  createElement("overlay");
+  createElement("board-creation-window", document.body);
+  createElement("overlay", document.body);
 });
 
-// eventsPerformedOnInputs.forEach((event) => {
-//   document
-//     .querySelector(".actual-normal-input")
-//     .addEventListener(event, ({ target }) => {
-//       switch (event) {
-//         case "click":
-//           target.dataset.state = "allowed";
-//           break;
-//         case "onmouseup":
-//           console.log(target.value);
-//           if (target.value === "") createErrorMessage("Can't be empty");
-//           break;
-//         default:
-//           break;
-//       }
-//     });
-// });
-
-// document
-//   .querySelector(".actual-normal-input")
-//   .addEventListener(
-//     "click",
-//     ({ target }) => (target.dataset.state = "allowed")
-//   );
-
 function observeMutation() {
-  const observer = new MutationObserver((mutations) => {
+  const observerOnBody = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       mutation.addedNodes.forEach((addedNode) => {
         if (addedNode.classList?.contains("show-sidebar-btn")) {
@@ -143,6 +126,13 @@ function observeMutation() {
           const boardCreationWindow = addedNode;
           const boardNameInput = boardCreationWindow.querySelector(
             ".actual-normal-input"
+          );
+          const addNewEditableInputContentBtn =
+            boardCreationWindow.querySelector(
+              ".add-new-editable-input-content-btn"
+            );
+          const createNewBoardBtn = boardCreationWindow.querySelector(
+            ".create-new-board-btn"
           );
           eventsPerformedOnInputs.forEach((event) =>
             boardNameInput.addEventListener(event, ({ target }) => {
@@ -175,13 +165,73 @@ function observeMutation() {
               }
             })
           );
+
+          const allOldEditableContentSpots = Array.from(
+            boardCreationWindow.querySelectorAll(".editable-input-content")
+          );
+
+          function handleDeleteColumns() {
+            allOldEditableContentSpots.forEach((column) => {
+              column.addEventListener("click", ({ target }) => {
+                if (!target.classList?.contains("delete-btn")) return;
+                target.parentElement.remove();
+              });
+            });
+          }
+
+          handleDeleteColumns();
+
+          addNewEditableInputContentBtn.addEventListener("click", () => {
+            createElement(
+              "new-editable-input-content",
+              boardCreationWindow.querySelector(".editable-input")
+            );
+            const allNewEditableContentSpots =
+              boardCreationWindow.querySelectorAll(".editable-input-content");
+            allOldEditableContentSpots.push(
+              allNewEditableContentSpots[allNewEditableContentSpots.length - 1]
+            );
+            handleDeleteColumns();
+          });
+
+          createNewBoardBtn.addEventListener("click", () => {
+            const requiredInput = boardCreationWindow.querySelector(
+              ".actual-normal-input"
+            );
+            if (
+              requiredInput.value === "" ||
+              requiredInput.value.length < 10 ||
+              allOldEditableContentSpots.some(
+                (column) =>
+                  column.querySelector(".actual-editable-input").value === ""
+              )
+            )
+              return;
+            allBoards.push({
+              name: requiredInput.value,
+              columns: allOldEditableContentSpots.map((editableSpot) => {
+                return {
+                  colName: editableSpot.querySelector(".actual-editable-input")
+                    .value,
+                  tasks: [],
+                };
+              }),
+            });
+            console.log(allBoards);
+          });
         }
       });
     });
   });
-  observer.observe(document.body, {
+  observerOnBody.observe(document.body, {
     childList: true,
   });
 }
-
 observeMutation();
+
+// document
+// .querySelector(".overlay")
+// ?.addEventListener("click", ({ target }) => {
+//   document.querySelector(".window")?.remove();
+//   target.remove();
+// });
