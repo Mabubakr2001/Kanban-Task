@@ -7,6 +7,7 @@ const boardCreationBtn = document.querySelector(".board-creation-btn");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 const allBoards = [];
+let counter = 0;
 
 function createElement(elementType, parentElementToInsert) {
   let element;
@@ -45,7 +46,7 @@ function createElement(elementType, parentElementToInsert) {
       </div>
       <div class="editable-input">
         <h4>Board Columns</h4>
-        <div class="editable-input-content">
+        <div class="editable-input-content" id="${counter}">
           <input type="text" data-state="normal" class="actual-editable-input" value=""/>
           <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
         </div>
@@ -71,7 +72,7 @@ function createElement(elementType, parentElementToInsert) {
       break;
     case "new-editable-input-content":
       element = `
-       <div class="editable-input-content">
+       <div class="editable-input-content" id="${counter}">
         <input type="text" data-state="normal" class="actual-editable-input" value=""/>
         <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
        </div>
@@ -107,6 +108,7 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
 });
 
 boardCreationBtn.addEventListener("click", () => {
+  counter++;
   createElement("board-creation-window", document.body);
   createElement("overlay", document.body);
 });
@@ -170,18 +172,8 @@ function observeMutation() {
             boardCreationWindow.querySelectorAll(".editable-input-content")
           );
 
-          function handleDeleteColumns() {
-            allOldEditableContentSpots.forEach((column) => {
-              column.addEventListener("click", ({ target }) => {
-                if (!target.classList?.contains("delete-btn")) return;
-                target.parentElement.remove();
-              });
-            });
-          }
-
-          handleDeleteColumns();
-
           addNewEditableInputContentBtn.addEventListener("click", () => {
+            counter++;
             createElement(
               "new-editable-input-content",
               boardCreationWindow.querySelector(".editable-input")
@@ -193,6 +185,22 @@ function observeMutation() {
             );
             handleDeleteColumns();
           });
+
+          function handleDeleteColumns() {
+            allOldEditableContentSpots.forEach((column) => {
+              column.addEventListener("click", ({ target }) => {
+                if (!target.classList?.contains("delete-btn")) return;
+                target.parentElement.remove();
+                const choosen = allOldEditableContentSpots.findIndex(
+                  (content) => content.id === target.parentElement.id
+                );
+                if (choosen === -1) return;
+                allOldEditableContentSpots.splice(choosen, 1);
+              });
+            });
+          }
+
+          handleDeleteColumns();
 
           createNewBoardBtn.addEventListener("click", () => {
             const requiredInput = boardCreationWindow.querySelector(
