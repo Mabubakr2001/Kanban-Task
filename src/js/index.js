@@ -4,12 +4,15 @@ const boardCreationSpot = document.querySelector(".board-creation");
 const hideSidebarBtn = document.querySelector(".hide-sidebar-btn");
 const toggleModeSpot = document.querySelector(".toggle-mode");
 const boardCreationBtn = document.querySelector(".board-creation-btn");
+const allBoardsSpot = document.querySelector(".all-boards");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 const allBoards = [];
 let counter = 0;
+let BoardID = 1;
+const API_URL = "http://localhost:5000/boards";
 
-function createElement(elementType, parentElementToInsert) {
+function createElement(elementType, parentElementToInsert, name = undefined) {
   let element;
   switch (elementType) {
     case "sidebar-btn":
@@ -77,6 +80,26 @@ function createElement(elementType, parentElementToInsert) {
         <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
        </div>
        `;
+      break;
+    case "new-board":
+      element = `
+       <div class="created-board-name" id="${BoardID}">
+         <svg
+           xmlns="http://www.w3.org/2000/svg"
+           width="20"
+           height="20"
+           fill="currentColor"
+           class="bi bi-kanban-fill"
+           viewBox="0 0 16 16"
+         >
+           <path
+             d="M2.5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2h-11zm5 2h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm-5 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3zm9-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"
+           />
+         </svg>
+         <h3>${name}</h3>
+       </div>
+       `;
+      break;
     default:
       break;
   }
@@ -88,6 +111,31 @@ function createErrorMessage(textToPut) {
   errorElement.classList.add("input-error");
   errorElement.textContent = textToPut;
   document.querySelector(".normal-input").appendChild(errorElement);
+}
+
+async function AJAXCall(URL, method = undefined, dataToUpload = undefined) {
+  try {
+    const fetchPro = dataToUpload
+      ? fetch(URL, {
+          method,
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(dataToUpload),
+        })
+      : method && !dataToUpload
+      ? fetch(URL, {
+          method,
+        })
+      : fetch(URL);
+    const response = await fetchPro;
+    if (!response.ok)
+      throw new Error(`Something went wrong ${response.states}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 hideSidebarBtn.addEventListener("click", () => {
@@ -107,10 +155,20 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
   }
 });
 
-boardCreationBtn.addEventListener("click", () => {
+boardCreationBtn.addEventListener("click", ({ target }) => {
   counter++;
   createElement("board-creation-window", document.body);
   createElement("overlay", document.body);
+  target.blur();
+});
+
+window.addEventListener("load", async () => {
+  const boardsFromDataBase = await AJAXCall(API_URL);
+  console.log(boardsFromDataBase[boardsFromDataBase.length - 1].id);
+  boardsFromDataBase.forEach((board) =>
+    createElement("new-board", allBoardsSpot, board.name, board.id)
+  );
+  BoardID = boardsFromDataBase[boardsFromDataBase.length - 1].id;
 });
 
 function observeMutation() {
@@ -126,6 +184,16 @@ function observeMutation() {
         }
         if (addedNode.classList?.contains("get-info-window")) {
           const boardCreationWindow = addedNode;
+          const overlay = document.querySelector(".overlay");
+          overlay.addEventListener("click", ({ target }) => {
+            boardCreationWindow.remove();
+            target.remove();
+          });
+          window.addEventListener("keydown", ({ key }) => {
+            if (key !== "Escape") return;
+            boardCreationWindow.remove();
+            overlay.remove();
+          });
           const boardNameInput = boardCreationWindow.querySelector(
             ".actual-normal-input"
           );
@@ -215,7 +283,7 @@ function observeMutation() {
               )
             )
               return;
-            allBoards.push({
+            const newBoard = {
               name: requiredInput.value,
               columns: allOldEditableContentSpots.map((editableSpot) => {
                 return {
@@ -224,8 +292,14 @@ function observeMutation() {
                   tasks: [],
                 };
               }),
-            });
-            console.log(allBoards);
+            };
+            AJAXCall(API_URL, "POST", newBoard);
+            createElement("new-board", allBoardsSpot, requiredInput.value);
+            console.log(BoardID);
+            BoardID++;
+            overlay.remove();
+            boardCreationWindow.remove();
+            document.querySelector(".hint")?.remove();
           });
         }
       });

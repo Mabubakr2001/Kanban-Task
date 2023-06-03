@@ -95,18 +95,20 @@
         overflow: hidden;
         text-overflow: ellipsis;
         margin-right: rem(10px);
+        width: 91%;
       }
       svg {
         margin: -2px 10px 0 7px;
         pointer-events: none;
         user-select: none;
+        width: 9%;
       }
     }
   }
   .board-creation-btn {
     @extend %rounded-shape;
     transition: t.$mainTransition;
-    margin-top: 1px;
+    margin-top: 20px;
     width: calc(92% - 12px);
     @at-root body[data-mode="dark"] & {
       background-color: map-get(c.$colors, main);
