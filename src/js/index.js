@@ -5,14 +5,19 @@ const hideSidebarBtn = document.querySelector(".hide-sidebar-btn");
 const toggleModeSpot = document.querySelector(".toggle-mode");
 const boardCreationBtn = document.querySelector(".board-creation-btn");
 const allBoardsSpot = document.querySelector(".all-boards");
+const hint = document.querySelector(".hint");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
-const allBoards = [];
 let counter = 0;
 let BoardID = 1;
 const API_URL = "http://localhost:5000/boards";
 
-function createElement(elementType, parentElementToInsert, name = undefined) {
+function createMarkup(
+  elementType,
+  parentElementToInsert,
+  name = undefined,
+  BoardID = undefined
+) {
   let element;
   switch (elementType) {
     case "sidebar-btn":
@@ -83,7 +88,7 @@ function createElement(elementType, parentElementToInsert, name = undefined) {
       break;
     case "new-board":
       element = `
-       <div class="created-board-name" id="${BoardID}">
+       <div class="created-board-name" id="${BoardID}" data-state="active">
          <svg
            xmlns="http://www.w3.org/2000/svg"
            width="20"
@@ -100,6 +105,12 @@ function createElement(elementType, parentElementToInsert, name = undefined) {
        </div>
        `;
       break;
+    case "board-title":
+      element = `
+       <h2 class="board-title">${name}</h2>
+       `;
+      parentElementToInsert.insertAdjacentHTML("afterbegin", element);
+      return;
     default:
       break;
   }
@@ -107,7 +118,7 @@ function createElement(elementType, parentElementToInsert, name = undefined) {
 }
 
 function createErrorMessage(textToPut) {
-  const errorElement = document.createElement("p");
+  const errorElement = document.createMarkup("p");
   errorElement.classList.add("input-error");
   errorElement.textContent = textToPut;
   document.querySelector(".normal-input").appendChild(errorElement);
@@ -129,8 +140,12 @@ async function AJAXCall(URL, method = undefined, dataToUpload = undefined) {
         })
       : fetch(URL);
     const response = await fetchPro;
-    if (!response.ok)
-      throw new Error(`Something went wrong ${response.states}`);
+    if (!response.ok) {
+      console.log(response);
+      throw new Error(
+        `Something went wrong (${response.status}) ${response.statusText}.`
+      );
+    }
     const data = await response.json();
     return data;
   } catch (error) {
@@ -140,7 +155,7 @@ async function AJAXCall(URL, method = undefined, dataToUpload = undefined) {
 
 hideSidebarBtn.addEventListener("click", () => {
   boardCreationSpot.dataset.state = "hidden";
-  createElement("sidebar-btn", document.body);
+  createMarkup("sidebar-btn", document.body);
 });
 
 toggleModeSpot.addEventListener("click", ({ target }) => {
@@ -157,18 +172,19 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
 
 boardCreationBtn.addEventListener("click", ({ target }) => {
   counter++;
-  createElement("board-creation-window", document.body);
-  createElement("overlay", document.body);
+  createMarkup("board-creation-window", document.body);
+  createMarkup("overlay", document.body);
   target.blur();
 });
 
 window.addEventListener("load", async () => {
   const boardsFromDataBase = await AJAXCall(API_URL);
-  console.log(boardsFromDataBase[boardsFromDataBase.length - 1].id);
+  if (boardsFromDataBase.length > 0) hint.remove();
+  if (boardsFromDataBase[boardsFromDataBase.length - 1]?.id == null) return;
+  BoardID = boardsFromDataBase[boardsFromDataBase.length - 1].id + 1;
   boardsFromDataBase.forEach((board) =>
-    createElement("new-board", allBoardsSpot, board.name, board.id)
+    createMarkup("new-board", allBoardsSpot, board.name, board.id)
   );
-  BoardID = boardsFromDataBase[boardsFromDataBase.length - 1].id;
 });
 
 function observeMutation() {
@@ -242,7 +258,7 @@ function observeMutation() {
 
           addNewEditableInputContentBtn.addEventListener("click", () => {
             counter++;
-            createElement(
+            createMarkup(
               "new-editable-input-content",
               boardCreationWindow.querySelector(".editable-input")
             );
@@ -270,7 +286,7 @@ function observeMutation() {
 
           handleDeleteColumns();
 
-          createNewBoardBtn.addEventListener("click", () => {
+          createNewBoardBtn.addEventListener("click", async () => {
             const requiredInput = boardCreationWindow.querySelector(
               ".actual-normal-input"
             );
@@ -283,6 +299,21 @@ function observeMutation() {
               )
             )
               return;
+            // async function getBoardsArrayFromDatabase() {
+            //   return awaitAJAXCall(API_URL);
+            // }
+            const oldBoardsFromDataBase = await AJAXCall(API_URL);
+            if (oldBoardsFromDataBase.length > 0) {
+              console.log(oldBoardsFromDataBase);
+              oldBoardsFromDataBase.forEach((board) => {
+                const editedBoard = { ...board, state: "disabled" };
+                console.log(editedBoard);
+                AJAXCall(API_URL, "PUT", editedBoard);
+              });
+              // const newBoardsArray = oldBoardsFromDataBase.map((board) => {
+              //   return { ...board, state: "disabled" };
+              // });
+            }
             const newBoard = {
               name: requiredInput.value,
               columns: allOldEditableContentSpots.map((editableSpot) => {
@@ -292,14 +323,25 @@ function observeMutation() {
                   tasks: [],
                 };
               }),
+              state: "active",
             };
             AJAXCall(API_URL, "POST", newBoard);
-            createElement("new-board", allBoardsSpot, requiredInput.value);
-            console.log(BoardID);
+            createMarkup(
+              "new-board",
+              allBoardsSpot,
+              requiredInput.value,
+              BoardID
+            );
+            document.querySelector(".board-title")?.remove();
+            createMarkup(
+              "board-title",
+              document.querySelector(".board-info"),
+              requiredInput.value
+            );
             BoardID++;
             overlay.remove();
             boardCreationWindow.remove();
-            document.querySelector(".hint")?.remove();
+            hint?.remove();
           });
         }
       });

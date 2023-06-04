@@ -1,34 +1,26 @@
 {
   "boards": [
     {
-      "name": "ffffffffff",
+      "name": "fffffffffffffffff",
       "columns": [
         {
-          "colName": "dddddddddd",
+          "colName": "f",
           "tasks": []
         }
       ],
+      "state": "active",
       "id": 1
     },
     {
-      "name": "fsssssssssss",
+      "name": "ddddddddddddddd",
       "columns": [
         {
-          "colName": "sssssss",
+          "colName": "d",
           "tasks": []
         }
       ],
+      "state": "active",
       "id": 2
-    },
-    {
-      "name": "dsfsdfvvas",
-      "columns": [
-        {
-          "colName": "dva",
-          "tasks": []
-        }
-      ],
-      "id": 3
     }
   ]
 }
