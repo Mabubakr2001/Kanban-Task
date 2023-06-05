@@ -257,8 +257,6 @@ function observeMutation() {
             )
               return;
 
-            app.allBoards.forEach((board) => (board.state = "disabled"));
-            interactWithLocalStorage("set");
             const newBoard = {
               name: requiredInput.value,
               columns: allOldEditableContentSpots.map((editableSpot) => {
@@ -278,6 +276,9 @@ function observeMutation() {
               if (allCreatedBoardElements[i].id == newBoard.ID) continue;
               allCreatedBoardElements[i].dataset.state = "disabled";
             }
+            // The problem
+            app.allBoards.forEach((board) => (board.state = "disabled"));
+            // interactWithLocalStorage("set");
             app.allBoards.push(newBoard);
             interactWithLocalStorage("set");
             createMarkup({
@@ -311,7 +312,7 @@ observeMutation();
 // Look here
 window.addEventListener("load", () => {
   const theAppObjectFromLocalStorage = interactWithLocalStorage("get");
-  console.log(theAppObjectFromLocalStorage);
+  // console.log(theAppObjectFromLocalStorage);
 
   if (theAppObjectFromLocalStorage == null)
     return interactWithLocalStorage("set");
@@ -320,12 +321,7 @@ window.addEventListener("load", () => {
   document.querySelector(".toggle-mode").dataset.currentMode =
     theAppObjectFromLocalStorage.mode || "light";
 
-  if (
-    theAppObjectFromLocalStorage == null ||
-    theAppObjectFromLocalStorage.allBoards == null ||
-    theAppObjectFromLocalStorage.allBoards.length === 0
-  )
-    return;
+  if (theAppObjectFromLocalStorage.allBoards.length === 0) return;
 
   app = theAppObjectFromLocalStorage;
 
