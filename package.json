@@ -4,15 +4,13 @@
   "description": "",
   "scripts": {
     "build": "webpack",
-    "dev": "webpack serve",
-    "server": "json-server --watch db.json --port 5000"
+    "dev": "webpack serve"
   },
   "keywords": [
     "HTML",
     "SCSS",
     "JavaScript",
-    "Webpack",
-    "Bootstrap"
+    "Webpack"
   ],
   "author": "Mohamed Aboubakr",
   "private": true,
@@ -27,8 +25,5 @@
     "webpack": "^5.83.1",
     "webpack-cli": "^5.1.1",
     "webpack-dev-server": "^4.15.0"
-  },
-  "dependencies": {
-    "json-server": "^0.17.3"
   }
 }

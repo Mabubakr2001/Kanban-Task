@@ -9,15 +9,19 @@ const hint = document.querySelector(".hint");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let counter = 0;
-let BoardID = 1;
-const API_URL = "http://localhost:5000/boards";
+let ID = 1;
+let app = {
+  allBoards: [],
+  mode: "light",
+};
 
-function createMarkup(
+function createMarkup({
   elementType,
-  parentElementToInsert,
+  parentElement,
   name = undefined,
-  BoardID = undefined
-) {
+  boardID = undefined,
+  boardState = undefined,
+}) {
   let element;
   switch (elementType) {
     case "sidebar-btn":
@@ -88,7 +92,7 @@ function createMarkup(
       break;
     case "new-board":
       element = `
-       <div class="created-board-name" id="${BoardID}" data-state="active">
+       <div class="created-board-name" id="${boardID}" data-state="${boardState}">
          <svg
            xmlns="http://www.w3.org/2000/svg"
            width="20"
@@ -109,83 +113,35 @@ function createMarkup(
       element = `
        <h2 class="board-title">${name}</h2>
        `;
-      parentElementToInsert.insertAdjacentHTML("afterbegin", element);
+      parentElement.insertAdjacentHTML("afterbegin", element);
       return;
     default:
       break;
   }
-  parentElementToInsert.insertAdjacentHTML("beforeend", element);
+  parentElement.insertAdjacentHTML("beforeend", element);
 }
 
 function createErrorMessage(textToPut) {
-  const errorElement = document.createMarkup("p");
+  const errorElement = document.createElement("p");
   errorElement.classList.add("input-error");
   errorElement.textContent = textToPut;
   document.querySelector(".normal-input").appendChild(errorElement);
 }
 
-async function AJAXCall(URL, method = undefined, dataToUpload = undefined) {
-  try {
-    const fetchPro = dataToUpload
-      ? fetch(URL, {
-          method,
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify(dataToUpload),
-        })
-      : method && !dataToUpload
-      ? fetch(URL, {
-          method,
-        })
-      : fetch(URL);
-    const response = await fetchPro;
-    if (!response.ok) {
-      console.log(response);
-      throw new Error(
-        `Something went wrong (${response.status}) ${response.statusText}.`
-      );
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error);
+function interactWithLocalStorage(interactingMethod) {
+  switch (interactingMethod) {
+    case "set":
+      localStorage.setItem("app", JSON.stringify(app));
+      break;
+    case "get":
+      return JSON.parse(localStorage.getItem("app"));
+    case "clear":
+      localStorage.removeItem("app");
+      break;
+    default:
+      break;
   }
 }
-
-hideSidebarBtn.addEventListener("click", () => {
-  boardCreationSpot.dataset.state = "hidden";
-  createMarkup("sidebar-btn", document.body);
-});
-
-toggleModeSpot.addEventListener("click", ({ target }) => {
-  let theCurrentMode = document.body.dataset.mode;
-  if (theCurrentMode === "light") {
-    document.body.dataset.mode = "dark";
-    target.dataset.currentMode = "dark";
-  }
-  if (theCurrentMode === "dark") {
-    document.body.dataset.mode = "light";
-    target.dataset.currentMode = "light";
-  }
-});
-
-boardCreationBtn.addEventListener("click", ({ target }) => {
-  counter++;
-  createMarkup("board-creation-window", document.body);
-  createMarkup("overlay", document.body);
-  target.blur();
-});
-
-window.addEventListener("load", async () => {
-  const boardsFromDataBase = await AJAXCall(API_URL);
-  if (boardsFromDataBase.length > 0) hint.remove();
-  if (boardsFromDataBase[boardsFromDataBase.length - 1]?.id == null) return;
-  BoardID = boardsFromDataBase[boardsFromDataBase.length - 1].id + 1;
-  boardsFromDataBase.forEach((board) =>
-    createMarkup("new-board", allBoardsSpot, board.name, board.id)
-  );
-});
 
 function observeMutation() {
   const observerOnBody = new MutationObserver((mutations) => {
@@ -258,10 +214,11 @@ function observeMutation() {
 
           addNewEditableInputContentBtn.addEventListener("click", () => {
             counter++;
-            createMarkup(
-              "new-editable-input-content",
-              boardCreationWindow.querySelector(".editable-input")
-            );
+            createMarkup({
+              elementType: "new-editable-input-content",
+              parentElement:
+                boardCreationWindow.querySelector(".editable-input"),
+            });
             const allNewEditableContentSpots =
               boardCreationWindow.querySelectorAll(".editable-input-content");
             allOldEditableContentSpots.push(
@@ -299,21 +256,9 @@ function observeMutation() {
               )
             )
               return;
-            // async function getBoardsArrayFromDatabase() {
-            //   return awaitAJAXCall(API_URL);
-            // }
-            const oldBoardsFromDataBase = await AJAXCall(API_URL);
-            if (oldBoardsFromDataBase.length > 0) {
-              console.log(oldBoardsFromDataBase);
-              oldBoardsFromDataBase.forEach((board) => {
-                const editedBoard = { ...board, state: "disabled" };
-                console.log(editedBoard);
-                AJAXCall(API_URL, "PUT", editedBoard);
-              });
-              // const newBoardsArray = oldBoardsFromDataBase.map((board) => {
-              //   return { ...board, state: "disabled" };
-              // });
-            }
+
+            app.allBoards.forEach((board) => (board.state = "disabled"));
+            interactWithLocalStorage("set");
             const newBoard = {
               name: requiredInput.value,
               columns: allOldEditableContentSpots.map((editableSpot) => {
@@ -324,21 +269,31 @@ function observeMutation() {
                 };
               }),
               state: "active",
+              ID,
             };
-            AJAXCall(API_URL, "POST", newBoard);
-            createMarkup(
-              "new-board",
-              allBoardsSpot,
-              requiredInput.value,
-              BoardID
+            const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
+              ".created-board-name"
             );
+            for (let i = 0; i < allCreatedBoardElements.length; i++) {
+              if (allCreatedBoardElements[i].id == newBoard.ID) continue;
+              allCreatedBoardElements[i].dataset.state = "disabled";
+            }
+            app.allBoards.push(newBoard);
+            interactWithLocalStorage("set");
+            createMarkup({
+              elementType: "new-board",
+              parentElement: allBoardsSpot,
+              name: requiredInput.value,
+              boardID: ID,
+              boardState: "active",
+            });
             document.querySelector(".board-title")?.remove();
-            createMarkup(
-              "board-title",
-              document.querySelector(".board-info"),
-              requiredInput.value
-            );
-            BoardID++;
+            createMarkup({
+              elementType: "board-title",
+              parentElement: document.querySelector(".board-info"),
+              name: requiredInput.value,
+            });
+            ID++;
             overlay.remove();
             boardCreationWindow.remove();
             hint?.remove();
@@ -352,6 +307,78 @@ function observeMutation() {
   });
 }
 observeMutation();
+
+// Look here
+window.addEventListener("load", () => {
+  const theAppObjectFromLocalStorage = interactWithLocalStorage("get");
+  console.log(theAppObjectFromLocalStorage);
+
+  if (theAppObjectFromLocalStorage == null)
+    return interactWithLocalStorage("set");
+
+  document.body.dataset.mode = theAppObjectFromLocalStorage.mode || "light";
+  document.querySelector(".toggle-mode").dataset.currentMode =
+    theAppObjectFromLocalStorage.mode || "light";
+
+  if (
+    theAppObjectFromLocalStorage == null ||
+    theAppObjectFromLocalStorage.allBoards == null ||
+    theAppObjectFromLocalStorage.allBoards.length === 0
+  )
+    return;
+
+  app = theAppObjectFromLocalStorage;
+
+  ID = app.allBoards[app.allBoards.length - 1].ID + 1;
+  hint?.remove();
+
+  app.allBoards.forEach((board) => {
+    createMarkup({
+      elementType: "new-board",
+      parentElement: allBoardsSpot,
+      name: board.name,
+      boardID: board.ID,
+      boardState: board.state,
+    });
+    if (board.state === "active") {
+      createMarkup({
+        elementType: "board-title",
+        parentElement: document.querySelector(".board-info"),
+        name: board.name,
+      });
+    }
+  });
+});
+
+hideSidebarBtn.addEventListener("click", () => {
+  boardCreationSpot.dataset.state = "hidden";
+  createMarkup({ elementType: "sidebar-btn", parentElement: document.body });
+});
+
+toggleModeSpot.addEventListener("click", ({ target }) => {
+  let theCurrentMode = document.body.dataset.mode;
+  if (theCurrentMode === "light") {
+    document.body.dataset.mode = "dark";
+    target.dataset.currentMode = "dark";
+    app.mode = "dark";
+  }
+  if (theCurrentMode === "dark") {
+    document.body.dataset.mode = "light";
+    target.dataset.currentMode = "light";
+    app.mode = "light";
+  }
+  interactWithLocalStorage("set");
+});
+
+boardCreationBtn.addEventListener("click", ({ target }) => {
+  counter++;
+  createMarkup({
+    elementType: "board-creation-window",
+    parentElement: document.body,
+  });
+  createMarkup({ elementType: "overlay", parentElement: document.body });
+  target.blur();
+});
 
 // document
 // .querySelector(".overlay")
