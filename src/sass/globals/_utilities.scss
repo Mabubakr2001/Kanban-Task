@@ -64,7 +64,7 @@
         border-radius: 5px;
       }
     }
-    .input-error {
+    @at-root .input-error {
       color: red;
       font-size: rem(14px);
       font-weight: 500;

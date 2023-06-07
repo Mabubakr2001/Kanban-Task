@@ -121,11 +121,11 @@ function createMarkup({
   parentElement.insertAdjacentHTML("beforeend", element);
 }
 
-function createErrorMessage(textToPut) {
+function createErrorMessage(textToPut, parentElement) {
   const errorElement = document.createElement("p");
   errorElement.classList.add("input-error");
   errorElement.textContent = textToPut;
-  document.querySelector(".normal-input").appendChild(errorElement);
+  parentElement.appendChild(errorElement);
 }
 
 function interactWithLocalStorage(interactingMethod) {
@@ -176,37 +176,41 @@ function observeMutation() {
           const createNewBoardBtn = boardCreationWindow.querySelector(
             ".create-new-board-btn"
           );
-          eventsPerformedOnInputs.forEach((event) =>
+
+          eventsPerformedOnInputs.forEach((event) => {
             boardNameInput.addEventListener(event, ({ target }) => {
               switch (event) {
                 case "click":
                   if (target.dataset.state !== "empty")
-                    target.dataset.state = "allowed";
+                    target.dataset.state = "active";
                   break;
                 case "blur":
                   target.parentElement.querySelector(".input-error")?.remove();
                   if (target.value === "") {
-                    createErrorMessage("Can't be empty");
+                    createErrorMessage("Can't be empty", target.parentElement);
                     target.dataset.state = "empty";
                   }
-                  if (target.value.length < 10 && target.value !== "") {
-                    createErrorMessage("Minimum 10 characters");
+                  if (target.value.length < 5 && target.value !== "") {
+                    createErrorMessage(
+                      "Minimum 5 characters",
+                      target.parentElement
+                    );
                     target.dataset.state = "empty";
                   }
                   break;
                 case "input":
-                  if (target.value.length === 10) {
+                  if (target.value.length === 5) {
                     target.parentElement
                       .querySelector(".input-error")
                       ?.remove();
-                    target.dataset.state = "allowed";
+                    target.dataset.state = "active";
                   }
                   break;
                 default:
                   break;
               }
-            })
-          );
+            });
+          });
 
           const allOldEditableContentSpots = Array.from(
             boardCreationWindow.querySelectorAll(".editable-input-content")
@@ -249,7 +253,7 @@ function observeMutation() {
             );
             if (
               requiredInput.value === "" ||
-              requiredInput.value.length < 10 ||
+              requiredInput.value.length < 5 ||
               allOldEditableContentSpots.some(
                 (column) =>
                   column.querySelector(".actual-editable-input").value === ""
@@ -276,9 +280,7 @@ function observeMutation() {
               if (allCreatedBoardElements[i].id == newBoard.ID) continue;
               allCreatedBoardElements[i].dataset.state = "disabled";
             }
-            // The problem
             app.allBoards.forEach((board) => (board.state = "disabled"));
-            // interactWithLocalStorage("set");
             app.allBoards.push(newBoard);
             interactWithLocalStorage("set");
             createMarkup({
@@ -309,10 +311,8 @@ function observeMutation() {
 }
 observeMutation();
 
-// Look here
 window.addEventListener("load", () => {
   const theAppObjectFromLocalStorage = interactWithLocalStorage("get");
-  // console.log(theAppObjectFromLocalStorage);
 
   if (theAppObjectFromLocalStorage == null)
     return interactWithLocalStorage("set");
@@ -321,9 +321,9 @@ window.addEventListener("load", () => {
   document.querySelector(".toggle-mode").dataset.currentMode =
     theAppObjectFromLocalStorage.mode || "light";
 
-  if (theAppObjectFromLocalStorage.allBoards.length === 0) return;
-
   app = theAppObjectFromLocalStorage;
+
+  if (theAppObjectFromLocalStorage.allBoards.length === 0) return;
 
   ID = app.allBoards[app.allBoards.length - 1].ID + 1;
   hint?.remove();
