@@ -6,8 +6,11 @@
   height: calc(100vh - 77px);
   padding: rem(25px);
   position: relative;
+  display: flex;
+  justify-content: space-between;
   @at-root body[data-mode="dark"] & {
     border-top: 1px solid #3e3f4e;
+    color: map-get(c.$colors, main_2);
   }
   @at-root body[data-mode="light"] & {
     border-top: 1px solid #e2e2e2;
@@ -39,5 +42,26 @@
 
   @at-root body[data-mode="dark"] & {
     background-color: map-get(c.$colors, sub_3);
+  }
+
+  .board-column {
+    width: rem(300px);
+    .board-column-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: rem(30px);
+      .column-logo {
+        width: rem(15px);
+        height: rem(15px);
+        border-radius: 50%;
+        background-color: map-get(c.$colors, main);
+        margin-right: rem(8px);
+        margin-top: -2px;
+      }
+    }
+    .board-column-task {
+      padding: rem(30px);
+      background-color: map-get(c.$colors, sub);
+    }
   }
 }

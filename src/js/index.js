@@ -393,3 +393,5 @@ boardCreationBtn.addEventListener("click", ({ target }) => {
 //   document.querySelector(".window")?.remove();
 //   target.remove();
 // });
+
+console.log(typeof 42.1);

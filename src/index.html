@@ -18,7 +18,6 @@
         <h1>Kanban</h1>
       </div>
       <div class="board-info">
-        <!-- <h2 class="board-title">Platform Launch</h2> -->
         <div class="board-manipulation">
           <button class="add-btn">
             <svg
@@ -46,23 +45,7 @@
     <section class="app-body">
       <div class="board-creation" data-state="visible">
         <p>All Boards <span class="boards-num">(0)</span></p>
-        <div class="all-boards">
-          <!-- <div class="created-board-name" data-state="active">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              fill="currentColor"
-              class="bi bi-kanban-fill"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M2.5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2h-11zm5 2h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm-5 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3zm9-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"
-              />
-            </svg>
-            <h3>Platform Launch And Here we</h3>
-          </div> -->
-        </div>
+        <div class="all-boards"></div>
         <button class="board-creation-btn">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -112,6 +95,34 @@
           There are no columns, click <span>Create New Board</span> on the left
           side to start!
         </p>
+        <div class="board-column">
+          <div class="board-column-info">
+            <div class="column-logo"></div>
+            <span class="column-name"
+              >Todo <span class="subtasks-num">(0)</span></span
+            >
+          </div>
+          <div class="board-column-task">
+            <h4 class="task-title">Build UI for onboarding flow</h4>
+            <span class="subtasks-info">1 of 3 subtasks</span>
+          </div>
+        </div>
+        <div class="board-column">
+          <div class="board-column-info">
+            <div class="column-logo"></div>
+            <span class="column-name"
+              >Doing <span class="subtasks-num">(0)</span></span
+            >
+          </div>
+        </div>
+        <div class="board-column">
+          <div class="board-column-info">
+            <div class="column-logo"></div>
+            <span class="column-name"
+              >Done <span class="subtasks-num">(0)</span></span
+            >
+          </div>
+        </div>
       </div>
     </section>
   </body>
