@@ -93,17 +93,8 @@ function createMarkup({
     case "new-board":
       element = `
        <div class="created-board-name" id="${boardID}" data-state="${boardState}">
-         <svg
-           xmlns="http://www.w3.org/2000/svg"
-           width="20"
-           height="20"
-           fill="currentColor"
-           class="bi bi-kanban-fill"
-           viewBox="0 0 16 16"
-         >
-           <path
-             d="M2.5 0a2 2 0 0 0-2 2v12a2 2 0 0f 0 2 2h11a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2h-11zm5 2h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm-5 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3zm9-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"
-           />
+         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-kanban-fill" viewBox="0 0 16 16">
+           <path d="M2.5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2h-11zm5 2h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm-5 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3zm9-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
          </svg>
          <h3>${name}</h3>
        </div>
@@ -221,6 +212,15 @@ function observeMutation() {
               column.addEventListener("click", ({ target }) => {
                 if (!target.classList?.contains("delete-btn")) return;
                 target.parentElement.remove();
+                if (
+                  allOldEditableContentSpots.indexOf(target.parentElement) ===
+                  -1
+                )
+                  return;
+                allOldEditableContentSpots.splice(
+                  allOldEditableContentSpots.indexOf(target.parentElement),
+                  1
+                );
               });
             });
           }
@@ -233,11 +233,13 @@ function observeMutation() {
               parentElement:
                 boardCreationWindow.querySelector(".editable-input"),
             });
+
             const allNewEditableContentSpots =
               boardCreationWindow.querySelectorAll(".editable-input-content");
             allOldEditableContentSpots.push(
               allNewEditableContentSpots[allNewEditableContentSpots.length - 1]
             );
+
             handleDeleteColumns();
           });
 
@@ -245,6 +247,7 @@ function observeMutation() {
             const requiredInput = boardCreationWindow.querySelector(
               ".actual-normal-input"
             );
+
             if (
               requiredInput.value === "" ||
               requiredInput.value.length < 5 ||
@@ -289,18 +292,20 @@ function observeMutation() {
               boardState: "active",
             });
 
+            document.querySelector(".board-title")?.remove();
             createMarkup({
               elementType: "board-title",
               parentElement: document.querySelector(".board-info"),
               name: requiredInput.value,
             });
 
-            console.log(boardsNum);
-            document.querySelector(".board-title")?.remove();
+            boardsNum++;
             ID++;
+
             document.querySelector(
               ".boards-num"
             ).textContent = `(${boardsNum})`;
+
             overlay.remove();
             boardCreationWindow.remove();
             hint?.remove();
@@ -330,6 +335,9 @@ window.addEventListener("load", () => {
   if (theAppObjectFromLocalStorage.allBoards.length === 0) return;
 
   ID = app.allBoards[app.allBoards.length - 1].ID + 1;
+  boardsNum = app.allBoards.length;
+
+  document.querySelector(".boards-num").textContent = `(${boardsNum})`;
   hint?.remove();
 
   app.allBoards.forEach((board) => {
@@ -371,7 +379,6 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
 });
 
 boardCreationBtn.addEventListener("click", ({ target }) => {
-  boardsNum++;
   createMarkup({
     elementType: "board-creation-window",
     parentElement: document.body,
