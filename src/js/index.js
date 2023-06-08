@@ -8,7 +8,7 @@ const allBoardsSpot = document.querySelector(".all-boards");
 const hint = document.querySelector(".hint");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
-let counter = 0;
+let boardsNum = 0;
 let ID = 1;
 let app = {
   allBoards: [],
@@ -58,7 +58,7 @@ function createMarkup({
       </div>
       <div class="editable-input">
         <h4>Board Columns</h4>
-        <div class="editable-input-content" id="${counter}">
+        <div class="editable-input-content">
           <input type="text" data-state="normal" class="actual-editable-input" value=""/>
           <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
         </div>
@@ -84,7 +84,7 @@ function createMarkup({
       break;
     case "new-editable-input-content":
       element = `
-       <div class="editable-input-content" id="${counter}">
+       <div class="editable-input-content">
         <input type="text" data-state="normal" class="actual-editable-input" value=""/>
         <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
        </div>
@@ -102,7 +102,7 @@ function createMarkup({
            viewBox="0 0 16 16"
          >
            <path
-             d="M2.5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2h-11zm5 2h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm-5 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3zm9-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"
+             d="M2.5 0a2 2 0 0 0-2 2v12a2 2 0 0f 0 2 2h11a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2h-11zm5 2h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm-5 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3zm9-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"
            />
          </svg>
          <h3>${name}</h3>
@@ -216,8 +216,18 @@ function observeMutation() {
             boardCreationWindow.querySelectorAll(".editable-input-content")
           );
 
+          function handleDeleteColumns() {
+            allOldEditableContentSpots.forEach((column) => {
+              column.addEventListener("click", ({ target }) => {
+                if (!target.classList?.contains("delete-btn")) return;
+                target.parentElement.remove();
+              });
+            });
+          }
+
+          handleDeleteColumns();
+
           addNewEditableInputContentBtn.addEventListener("click", () => {
-            counter++;
             createMarkup({
               elementType: "new-editable-input-content",
               parentElement:
@@ -230,22 +240,6 @@ function observeMutation() {
             );
             handleDeleteColumns();
           });
-
-          function handleDeleteColumns() {
-            allOldEditableContentSpots.forEach((column) => {
-              column.addEventListener("click", ({ target }) => {
-                if (!target.classList?.contains("delete-btn")) return;
-                target.parentElement.remove();
-                const choosen = allOldEditableContentSpots.findIndex(
-                  (content) => content.id === target.parentElement.id
-                );
-                if (choosen === -1) return;
-                allOldEditableContentSpots.splice(choosen, 1);
-              });
-            });
-          }
-
-          handleDeleteColumns();
 
           createNewBoardBtn.addEventListener("click", async () => {
             const requiredInput = boardCreationWindow.querySelector(
@@ -273,16 +267,20 @@ function observeMutation() {
               state: "active",
               ID,
             };
+
             const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
               ".created-board-name"
             );
+
             for (let i = 0; i < allCreatedBoardElements.length; i++) {
               if (allCreatedBoardElements[i].id == newBoard.ID) continue;
               allCreatedBoardElements[i].dataset.state = "disabled";
             }
+
             app.allBoards.forEach((board) => (board.state = "disabled"));
             app.allBoards.push(newBoard);
             interactWithLocalStorage("set");
+
             createMarkup({
               elementType: "new-board",
               parentElement: allBoardsSpot,
@@ -290,13 +288,19 @@ function observeMutation() {
               boardID: ID,
               boardState: "active",
             });
-            document.querySelector(".board-title")?.remove();
+
             createMarkup({
               elementType: "board-title",
               parentElement: document.querySelector(".board-info"),
               name: requiredInput.value,
             });
+
+            console.log(boardsNum);
+            document.querySelector(".board-title")?.remove();
             ID++;
+            document.querySelector(
+              ".boards-num"
+            ).textContent = `(${boardsNum})`;
             overlay.remove();
             boardCreationWindow.remove();
             hint?.remove();
@@ -367,7 +371,7 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
 });
 
 boardCreationBtn.addEventListener("click", ({ target }) => {
-  counter++;
+  boardsNum++;
   createMarkup({
     elementType: "board-creation-window",
     parentElement: document.body,
