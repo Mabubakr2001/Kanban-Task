@@ -23,6 +23,9 @@
   width: 0;
   padding: rem(15px) 0;
   overflow: hidden;
+  position: sticky;
+  top: 77px;
+  left: 0;
   @at-root &[data-state="visible"] {
     display: flex;
     flex-direction: column;
@@ -54,17 +57,6 @@
     min-height: fit-content;
     max-height: rem(400px);
     overflow-y: scroll;
-    @at-root ::-webkit-scrollbar {
-      width: 12px;
-      border-radius: 15px;
-    }
-    @at-root ::-webkit-scrollbar-thumb {
-      border-radius: 15px;
-      background-color: map-get(c.$colors, main);
-    }
-    @at-root ::-webkit-scrollbar-thumb:hover {
-      background-color: #6957aa;
-    }
     .created-board-name {
       @extend %rounded-shape;
       transition: t.$mainTransition;

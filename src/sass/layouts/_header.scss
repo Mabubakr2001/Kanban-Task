@@ -3,6 +3,8 @@
 @use "../globals/functions" as *;
 
 header {
+  position: fixed;
+  top: 0;
   @at-root body[data-mode="dark"] & {
     background-color: map-get(c.$colors, sub);
     color: map-get(c.$colors, main_2);
@@ -10,6 +12,7 @@ header {
   display: flex;
   align-items: center;
   height: rem(77px);
+  width: 100vw;
   .logo-info {
     display: flex;
     align-items: center;

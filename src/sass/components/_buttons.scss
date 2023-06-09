@@ -2,8 +2,8 @@
 @use "../variables/transitions" as t;
 
 .show-sidebar-btn {
-  position: absolute;
-  bottom: 15px;
+  position: fixed;
+  top: calc(100vh - 62px);
   left: 0;
   height: 47px;
   width: 55px;
