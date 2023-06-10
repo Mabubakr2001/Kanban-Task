@@ -62,14 +62,18 @@
     }
     .board-column-task {
       padding: rem(22px) rem(17px);
-      background-color: map-get(c.$colors, sub);
       border-radius: 10px;
       cursor: grab;
+      background-color: map-get(c.$colors, main_2);
+      color: map-get(c.$colors, blackColor);
+      box-shadow: 0 0 5px 0 rgb(155, 155, 155);
       &:not(:last-child) {
         margin-bottom: 15px;
       }
-      @at-root body[data-mode="light"] & {
+      @at-root body[data-mode="dark"] & {
+        background-color: map-get(c.$colors, sub);
         color: map-get(c.$colors, main_2);
+        box-shadow: 0 0 5px 0 rgb(42, 42, 42);
       }
       > {
         h4 {
@@ -87,9 +91,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: map-get(c.$colors, sub);
     margin-top: rem(43px);
     border-radius: 10px;
+    background-color: map-get(c.$colors, main_2);
+    color: map-get(c.$colors, blackColor);
+    box-shadow: 0 0 5px 0 rgb(155, 155, 155);
+    @at-root body[data-mode="dark"] & {
+      background-color: map-get(c.$colors, sub);
+      color: map-get(c.$colors, main_2);
+      box-shadow: 0 0 5px 0 rgb(42, 42, 42);
+    }
     cursor: pointer;
     > span {
       display: flex;

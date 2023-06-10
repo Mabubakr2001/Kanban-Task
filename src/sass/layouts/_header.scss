@@ -5,9 +5,11 @@
 header {
   position: fixed;
   top: 0;
+  background-color: map-get(c.$colors, main_2);
+  color: map-get(c.$colors, blackColor);
   @at-root body[data-mode="dark"] & {
-    background-color: map-get(c.$colors, sub);
     color: map-get(c.$colors, main_2);
+    background-color: map-get(c.$colors, sub);
   }
   display: flex;
   align-items: center;
