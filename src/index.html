@@ -95,63 +95,22 @@
           There are no columns, click <span>Create New Board</span> on the left
           side to start!
         </p>
-        <div class="board-column">
+        <!-- <div class="board-column">
           <div class="board-column-info">
             <div class="column-logo"></div>
             <span class="column-name"
-              >Todo <span class="subtasks-num">(0)</span></span
+              >Todo <span class="tasks-num">(0)</span></span
             >
           </div>
           <div class="board-column-task">
             <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
+            <span class="subtasks-info"
+              ><span class="done-subtasks">1 </span>of
+              <span class="all-subtasks">3</span>subtasks</span
+            >
           </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-          <div class="board-column-task">
-            <h4 class="task-title">Build UI for onboarding flow</h4>
-            <span class="subtasks-info">1 of 3 subtasks</span>
-          </div>
-        </div>
-        <div class="add-column-spot">
+        </div> -->
+        <!-- <div class="add-column-spot">
           <span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -167,8 +126,47 @@
             </svg>
             New Column
           </span>
-        </div>
+        </div> -->
       </div>
     </section>
+    <div class="window get-info-window">
+      <h3>Add New Column</h3>
+      <div class="normal-input">
+        <h4>Column Name</h4>
+        <input
+          type="text"
+          data-state="normal"
+          class="actual-normal-input"
+          value=""
+        />
+      </div>
+      <!-- <div class="editable-input">
+        <h4>Tasks</h4>
+        <div class="editable-input-content">
+          <input
+            type="text"
+            data-state="normal"
+            class="actual-editable-input"
+            value=""
+          />
+          <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
+        </div>
+      </div> -->
+      <button class="add-new-editable-input-content-btn">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="25"
+          fill="#fff"
+          class="bi bi-plus"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+          />
+        </svg>
+        Add New Column
+      </button>
+    </div>
   </body>
 </html>

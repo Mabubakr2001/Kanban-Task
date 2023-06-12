@@ -1,6 +1,7 @@
 import "../sass/style.scss";
 import Board from "./board";
 const boardCreationSpot = document.querySelector(".board-creation");
+const boardContentSpot = document.querySelector(".board-content");
 const hideSidebarBtn = document.querySelector(".hide-sidebar-btn");
 const toggleModeSpot = document.querySelector(".toggle-mode");
 const boardCreationBtn = document.querySelector(".board-creation-btn");
@@ -18,9 +19,11 @@ let app = {
 function createMarkup({
   elementType,
   parentElement,
-  name = undefined,
+  boardName = undefined,
   boardID = undefined,
   boardState = undefined,
+  colName = undefined,
+  allTasksNum = undefined,
 }) {
   let element;
   switch (elementType) {
@@ -96,16 +99,49 @@ function createMarkup({
          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-kanban-fill" viewBox="0 0 16 16">
            <path d="M2.5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2h-11zm5 2h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm-5 1a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3zm9-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
          </svg>
-         <h3>${name}</h3>
+         <h3>${boardName}</h3>
        </div>
        `;
       break;
     case "board-title":
       element = `
-       <h2 class="board-title">${name}</h2>
+       <h2 class="board-title">${boardName}</h2>
        `;
       parentElement.insertAdjacentHTML("afterbegin", element);
       return;
+    case "board-column":
+      element = `
+      <div class="board-column">
+        <div class="board-column-info">
+          <div class="column-logo"></div>
+          <span class="column-name"
+            >${colName} <span class="tasks-num">(${allTasksNum})</span></span
+          >
+        </div>
+      </div>
+      `;
+      break;
+    case "add-column-spot":
+      element = `
+       <div class="add-column-spot">
+         <span>
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             width="23"
+             height="23"
+             fill="#828d9c"
+             class="bi bi-plus"
+             viewBox="0 0 16 16"
+           >
+             <path
+               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+             />
+           </svg>
+           New Column
+         </span>
+       </div>
+       `;
+      break;
     default:
       break;
   }
@@ -132,6 +168,26 @@ function interactWithLocalStorage(interactingMethod) {
     default:
       break;
   }
+}
+
+function showBoardContent(choosenBoard) {
+  boardContentSpot.innerHTML = "";
+
+  if (choosenBoard.columns.length > 0) {
+    choosenBoard.columns.forEach((column) => {
+      createMarkup({
+        elementType: "board-column",
+        parentElement: boardContentSpot,
+        colName: column.colName,
+        allTasksNum: column.tasks.length,
+      });
+    });
+  }
+
+  createMarkup({
+    elementType: "add-column-spot",
+    parentElement: boardContentSpot,
+  });
 }
 
 function observeMutation() {
@@ -259,7 +315,7 @@ function observeMutation() {
               return;
 
             const newBoard = {
-              name: requiredInput.value,
+              boardName: requiredInput.value,
               columns: allOldEditableContentSpots.map((editableSpot) => {
                 return {
                   colName: editableSpot.querySelector(".actual-editable-input")
@@ -287,17 +343,20 @@ function observeMutation() {
             createMarkup({
               elementType: "new-board",
               parentElement: allBoardsSpot,
-              name: requiredInput.value,
+              boardName: requiredInput.value,
               boardID: ID,
               boardState: "active",
             });
 
             document.querySelector(".board-title")?.remove();
+
             createMarkup({
               elementType: "board-title",
               parentElement: document.querySelector(".board-info"),
-              name: requiredInput.value,
+              boardName: requiredInput.value,
             });
+
+            showBoardContent(newBoard);
 
             boardsNum++;
             ID++;
@@ -319,6 +378,24 @@ function observeMutation() {
   });
 }
 observeMutation();
+
+allBoardsSpot.addEventListener("click", ({ target }) => {
+  const clickedBoard = target.closest(".created-board-name");
+  if (clickedBoard == null) return;
+  clickedBoard.parentElement
+    .querySelectorAll(".created-board-name")
+    .forEach((boardNameSpot) => (boardNameSpot.dataset.state = "disabled"));
+  clickedBoard.dataset.state = "active";
+  const choosenBoard = app.allBoards.find(
+    (board) => board.ID == clickedBoard.id
+  );
+  if (choosenBoard == null) return;
+  showBoardContent(choosenBoard);
+  app.allBoards.forEach((board) => (board.state = "disabled"));
+  choosenBoard.state = "active";
+  document.querySelector(".board-title").textContent = choosenBoard.boardName;
+  interactWithLocalStorage("set");
+});
 
 window.addEventListener("load", () => {
   const theAppObjectFromLocalStorage = interactWithLocalStorage("get");
@@ -344,7 +421,7 @@ window.addEventListener("load", () => {
     createMarkup({
       elementType: "new-board",
       parentElement: allBoardsSpot,
-      name: board.name,
+      boardName: board.boardName,
       boardID: board.ID,
       boardState: board.state,
     });
@@ -352,8 +429,10 @@ window.addEventListener("load", () => {
       createMarkup({
         elementType: "board-title",
         parentElement: document.querySelector(".board-info"),
-        name: board.name,
+        boardName: board.boardName,
       });
+
+      showBoardContent(board);
     }
   });
 });
@@ -393,5 +472,3 @@ boardCreationBtn.addEventListener("click", ({ target }) => {
 //   document.querySelector(".window")?.remove();
 //   target.remove();
 // });
-
-console.log(typeof 42.1);
