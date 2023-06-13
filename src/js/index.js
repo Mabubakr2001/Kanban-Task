@@ -53,7 +53,7 @@ function createMarkup({
       break;
     case "board-creation-window":
       element = `
-      <div class="window get-info-window">
+      <div class="window new-board-window">
       <h3>Add New Board</h3>
       <div class="normal-input">
         <h4>Board Name</h4>
@@ -142,6 +142,37 @@ function createMarkup({
        </div>
        `;
       break;
+    case "new-column":
+      element = `
+       <div class="window new-column-window">
+         <h3>Add New Column</h3>
+         <div class="normal-input">
+           <h4>Column Name</h4>
+           <input
+             type="text"
+             data-state="normal"
+             class="actual-normal-input"
+             value=""
+           />
+         </div>
+         <button class="add-new-editable-input-content-btn">
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             width="25"
+             height="25"
+             fill="#fff"
+             class="bi bi-plus"
+             viewBox="0 0 16 16"
+           >
+             <path
+               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+             />
+           </svg>
+           Add New Column
+         </button>
+       </div>
+       `;
+      break;
     default:
       break;
   }
@@ -190,6 +221,14 @@ function showBoardContent(choosenBoard) {
   });
 }
 
+function handleBoardContent() {
+  const addColumnSpot = document.querySelector(".add-column-spot");
+  addColumnSpot.addEventListener("click", () => {
+    createMarkup({ elementType: "new-column", parentElement: document.body });
+    createMarkup({ elementType: "overlay", parentElement: document.body });
+  });
+}
+
 function observeMutation() {
   const observerOnBody = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -201,173 +240,189 @@ function observeMutation() {
             target.remove();
           });
         }
-        if (addedNode.classList?.contains("get-info-window")) {
-          const boardCreationWindow = addedNode;
+        if (addedNode.classList?.contains("window")) {
           const overlay = document.querySelector(".overlay");
-          overlay.addEventListener("click", ({ target }) => {
-            boardCreationWindow.remove();
-            target.remove();
-          });
-          window.addEventListener("keydown", ({ key }) => {
-            if (key !== "Escape") return;
-            boardCreationWindow.remove();
-            overlay.remove();
-          });
-          const boardNameInput = boardCreationWindow.querySelector(
-            ".actual-normal-input"
-          );
-          const addNewEditableInputContentBtn =
-            boardCreationWindow.querySelector(
+          const openedWindow = addedNode;
+          if (openedWindow.classList?.contains("new-board-window")) {
+            const boardNameInput = openedWindow.querySelector(
+              ".actual-normal-input"
+            );
+            const addNewEditableInputContentBtn = openedWindow.querySelector(
               ".add-new-editable-input-content-btn"
             );
-          const createNewBoardBtn = boardCreationWindow.querySelector(
-            ".create-new-board-btn"
-          );
+            const createNewBoardBtn = openedWindow.querySelector(
+              ".create-new-board-btn"
+            );
 
-          eventsPerformedOnInputs.forEach((event) => {
-            boardNameInput.addEventListener(event, ({ target }) => {
-              switch (event) {
-                case "click":
-                  if (target.dataset.state !== "empty")
-                    target.dataset.state = "active";
-                  break;
-                case "blur":
-                  target.parentElement.querySelector(".input-error")?.remove();
-                  if (target.value === "") {
-                    createErrorMessage("Can't be empty", target.parentElement);
-                    target.dataset.state = "empty";
-                  }
-                  if (target.value.length < 5 && target.value !== "") {
-                    createErrorMessage(
-                      "Minimum 5 characters",
-                      target.parentElement
-                    );
-                    target.dataset.state = "empty";
-                  }
-                  break;
-                case "input":
-                  if (target.value.length === 5) {
+            eventsPerformedOnInputs.forEach((event) => {
+              boardNameInput.addEventListener(event, ({ target }) => {
+                switch (event) {
+                  case "click":
+                    if (target.dataset.state !== "empty")
+                      target.dataset.state = "active";
+                    break;
+                  case "blur":
                     target.parentElement
                       .querySelector(".input-error")
                       ?.remove();
-                    target.dataset.state = "active";
-                  }
-                  break;
-                default:
-                  break;
-              }
-            });
-          });
-
-          const allOldEditableContentSpots = Array.from(
-            boardCreationWindow.querySelectorAll(".editable-input-content")
-          );
-
-          function handleDeleteColumns() {
-            allOldEditableContentSpots.forEach((column) => {
-              column.addEventListener("click", ({ target }) => {
-                if (!target.classList?.contains("delete-btn")) return;
-                target.parentElement.remove();
-                if (
-                  allOldEditableContentSpots.indexOf(target.parentElement) ===
-                  -1
-                )
-                  return;
-                allOldEditableContentSpots.splice(
-                  allOldEditableContentSpots.indexOf(target.parentElement),
-                  1
-                );
+                    if (target.value === "") {
+                      createErrorMessage(
+                        "Can't be empty",
+                        target.parentElement
+                      );
+                      target.dataset.state = "empty";
+                    }
+                    if (target.value.length < 5 && target.value !== "") {
+                      createErrorMessage(
+                        "Minimum 5 characters",
+                        target.parentElement
+                      );
+                      target.dataset.state = "empty";
+                    }
+                    break;
+                  case "input":
+                    if (target.value.length === 5) {
+                      target.parentElement
+                        .querySelector(".input-error")
+                        ?.remove();
+                      target.dataset.state = "active";
+                    }
+                    break;
+                  default:
+                    break;
+                }
               });
+            });
+
+            const allOldEditableContentSpots = Array.from(
+              openedWindow.querySelectorAll(".editable-input-content")
+            );
+
+            function handleDeleteColumns() {
+              allOldEditableContentSpots.forEach((column) => {
+                column.addEventListener("click", ({ target }) => {
+                  if (!target.classList?.contains("delete-btn")) return;
+                  target.parentElement.remove();
+                  if (
+                    allOldEditableContentSpots.indexOf(target.parentElement) ===
+                    -1
+                  )
+                    return;
+                  allOldEditableContentSpots.splice(
+                    allOldEditableContentSpots.indexOf(target.parentElement),
+                    1
+                  );
+                });
+              });
+            }
+
+            handleDeleteColumns();
+
+            addNewEditableInputContentBtn.addEventListener("click", () => {
+              createMarkup({
+                elementType: "new-editable-input-content",
+                parentElement: openedWindow.querySelector(".editable-input"),
+              });
+
+              const allNewEditableContentSpots = openedWindow.querySelectorAll(
+                ".editable-input-content"
+              );
+              allOldEditableContentSpots.push(
+                allNewEditableContentSpots[
+                  allNewEditableContentSpots.length - 1
+                ]
+              );
+
+              handleDeleteColumns();
+            });
+
+            createNewBoardBtn.addEventListener("click", () => {
+              const requiredInput = openedWindow.querySelector(
+                ".actual-normal-input"
+              );
+
+              if (
+                requiredInput.value === "" ||
+                requiredInput.value.length < 5 ||
+                allOldEditableContentSpots.some(
+                  (column) =>
+                    column.querySelector(".actual-editable-input").value === ""
+                )
+              )
+                return;
+
+              const newBoard = {
+                boardName: requiredInput.value,
+                columns: allOldEditableContentSpots.map((editableSpot) => {
+                  return {
+                    colName: editableSpot.querySelector(
+                      ".actual-editable-input"
+                    ).value,
+                    tasks: [],
+                  };
+                }),
+                state: "active",
+                ID,
+              };
+
+              const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
+                ".created-board-name"
+              );
+
+              for (let i = 0; i < allCreatedBoardElements.length; i++) {
+                if (allCreatedBoardElements[i].id == newBoard.ID) continue;
+                allCreatedBoardElements[i].dataset.state = "disabled";
+              }
+
+              app.allBoards.forEach((board) => (board.state = "disabled"));
+              app.allBoards.push(newBoard);
+              interactWithLocalStorage("set");
+
+              createMarkup({
+                elementType: "new-board",
+                parentElement: allBoardsSpot,
+                boardName: requiredInput.value,
+                boardID: ID,
+                boardState: "active",
+              });
+
+              document.querySelector(".board-title")?.remove();
+
+              createMarkup({
+                elementType: "board-title",
+                parentElement: document.querySelector(".board-info"),
+                boardName: requiredInput.value,
+              });
+
+              showBoardContent(newBoard);
+              handleBoardContent();
+
+              boardsNum++;
+              ID++;
+
+              document.querySelector(
+                ".boards-num"
+              ).textContent = `(${boardsNum})`;
+
+              overlay.remove();
+              openedWindow.remove();
+              hint?.remove();
             });
           }
 
-          handleDeleteColumns();
+          if (openedWindow.classList?.contains("new-column-window")) {
+            console.log("Done");
+          }
 
-          addNewEditableInputContentBtn.addEventListener("click", () => {
-            createMarkup({
-              elementType: "new-editable-input-content",
-              parentElement:
-                boardCreationWindow.querySelector(".editable-input"),
-            });
-
-            const allNewEditableContentSpots =
-              boardCreationWindow.querySelectorAll(".editable-input-content");
-            allOldEditableContentSpots.push(
-              allNewEditableContentSpots[allNewEditableContentSpots.length - 1]
-            );
-
-            handleDeleteColumns();
+          overlay.addEventListener("click", ({ target }) => {
+            openedWindow.remove();
+            target.remove();
           });
 
-          createNewBoardBtn.addEventListener("click", async () => {
-            const requiredInput = boardCreationWindow.querySelector(
-              ".actual-normal-input"
-            );
-
-            if (
-              requiredInput.value === "" ||
-              requiredInput.value.length < 5 ||
-              allOldEditableContentSpots.some(
-                (column) =>
-                  column.querySelector(".actual-editable-input").value === ""
-              )
-            )
-              return;
-
-            const newBoard = {
-              boardName: requiredInput.value,
-              columns: allOldEditableContentSpots.map((editableSpot) => {
-                return {
-                  colName: editableSpot.querySelector(".actual-editable-input")
-                    .value,
-                  tasks: [],
-                };
-              }),
-              state: "active",
-              ID,
-            };
-
-            const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
-              ".created-board-name"
-            );
-
-            for (let i = 0; i < allCreatedBoardElements.length; i++) {
-              if (allCreatedBoardElements[i].id == newBoard.ID) continue;
-              allCreatedBoardElements[i].dataset.state = "disabled";
-            }
-
-            app.allBoards.forEach((board) => (board.state = "disabled"));
-            app.allBoards.push(newBoard);
-            interactWithLocalStorage("set");
-
-            createMarkup({
-              elementType: "new-board",
-              parentElement: allBoardsSpot,
-              boardName: requiredInput.value,
-              boardID: ID,
-              boardState: "active",
-            });
-
-            document.querySelector(".board-title")?.remove();
-
-            createMarkup({
-              elementType: "board-title",
-              parentElement: document.querySelector(".board-info"),
-              boardName: requiredInput.value,
-            });
-
-            showBoardContent(newBoard);
-
-            boardsNum++;
-            ID++;
-
-            document.querySelector(
-              ".boards-num"
-            ).textContent = `(${boardsNum})`;
-
+          window.addEventListener("keydown", ({ key }) => {
+            if (key !== "Escape") return;
+            openedWindow.remove();
             overlay.remove();
-            boardCreationWindow.remove();
-            hint?.remove();
           });
         }
       });
@@ -435,6 +490,7 @@ window.addEventListener("load", () => {
       showBoardContent(board);
     }
   });
+  handleBoardContent();
 });
 
 hideSidebarBtn.addEventListener("click", () => {
