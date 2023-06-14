@@ -18,12 +18,14 @@ let app = {
 
 function createMarkup({
   elementType,
-  parentElement,
+  placeToInsert,
+  elementToInsertInto,
   boardName = undefined,
   boardID = undefined,
   boardState = undefined,
   colName = undefined,
   allTasksNum = undefined,
+  taskName = undefined,
 }) {
   let element;
   switch (elementType) {
@@ -81,7 +83,7 @@ function createMarkup({
         </svg>
         Add New Column
       </button>
-      <button class="create-new-board-btn">Create New Board</button>
+      <button class="create-element-btn">Create New Board</button>
      </div>
       `;
       break;
@@ -107,11 +109,10 @@ function createMarkup({
       element = `
        <h2 class="board-title">${boardName}</h2>
        `;
-      parentElement.insertAdjacentHTML("afterbegin", element);
-      return;
+      break;
     case "board-column":
       element = `
-      <div class="board-column">
+      <div class="board-column" data-name="${colName}">
         <div class="board-column-info">
           <div class="column-logo"></div>
           <span class="column-name"
@@ -142,41 +143,55 @@ function createMarkup({
        </div>
        `;
       break;
-    case "new-column":
+    case "new-column-creation-window":
       element = `
-       <div class="window new-column-window">
-         <h3>Add New Column</h3>
-         <div class="normal-input">
-           <h4>Column Name</h4>
-           <input
-             type="text"
-             data-state="normal"
-             class="actual-normal-input"
-             value=""
-           />
-         </div>
-         <button class="add-new-editable-input-content-btn">
-           <svg
-             xmlns="http://www.w3.org/2000/svg"
-             width="25"
-             height="25"
-             fill="#fff"
-             class="bi bi-plus"
-             viewBox="0 0 16 16"
-           >
-             <path
-               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
-             />
-           </svg>
-           Add New Column
-         </button>
+      <div class="window new-column-window">
+      <h3>Add New Column</h3>
+      <div class="normal-input">
+        <h4>Column Name</h4>
+        <input type="text" data-state="normal" class="actual-normal-input" value=""/>
+      </div>
+      <div class="editable-input">
+        <h4>All Tasks</h4>
+        <div class="editable-input-content">
+          <input type="text" data-state="normal" class="actual-editable-input" value=""/>
+          <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
+        </div>
+      </div>
+      <button class="add-new-editable-input-content-btn">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="25"
+          fill="#fff"
+          class="bi bi-plus"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+          />
+        </svg>
+        Add New Task
+      </button>
+      <button class="create-element-btn">Create New Column</button>
+     </div>
+       `;
+      break;
+    case "new-task":
+      element = `
+       <div class="board-column-task">
+         <h4 class="task-title">${taskName}</h4>
+         <span class="subtasks-info"
+           ><span class="done-subtasks">0 </span>of
+           <span class="all-subtasks">0 </span>subtasks</span
+         >
        </div>
        `;
       break;
     default:
       break;
   }
-  parentElement.insertAdjacentHTML("beforeend", element);
+  elementToInsertInto.insertAdjacentHTML(placeToInsert, element);
 }
 
 function createErrorMessage(textToPut, parentElement) {
@@ -208,7 +223,8 @@ function showBoardContent(choosenBoard) {
     choosenBoard.columns.forEach((column) => {
       createMarkup({
         elementType: "board-column",
-        parentElement: boardContentSpot,
+        placeToInsert: "beforeend",
+        elementToInsertInto: boardContentSpot,
         colName: column.colName,
         allTasksNum: column.tasks.length,
       });
@@ -217,15 +233,25 @@ function showBoardContent(choosenBoard) {
 
   createMarkup({
     elementType: "add-column-spot",
-    parentElement: boardContentSpot,
+    placeToInsert: "beforeend",
+    elementToInsertInto: boardContentSpot,
   });
 }
 
 function handleBoardContent() {
   const addColumnSpot = document.querySelector(".add-column-spot");
-  addColumnSpot.addEventListener("click", () => {
-    createMarkup({ elementType: "new-column", parentElement: document.body });
-    createMarkup({ elementType: "overlay", parentElement: document.body });
+  addColumnSpot?.addEventListener("click", ({ target }) => {
+    createMarkup({
+      elementType: "new-column-creation-window",
+      elementToInsertInto: document.body,
+      placeToInsert: "beforeend",
+    });
+    createMarkup({
+      elementType: "overlay",
+      elementToInsertInto: document.body,
+      placeToInsert: "beforeend",
+    });
+    target.blur();
   });
 }
 
@@ -243,114 +269,98 @@ function observeMutation() {
         if (addedNode.classList?.contains("window")) {
           const overlay = document.querySelector(".overlay");
           const openedWindow = addedNode;
-          if (openedWindow.classList?.contains("new-board-window")) {
-            const boardNameInput = openedWindow.querySelector(
+          const actualNormalInput = openedWindow.querySelector(
+            ".actual-normal-input"
+          );
+          const createElementBtn = openedWindow.querySelector(
+            ".create-element-btn"
+          );
+
+          eventsPerformedOnInputs.forEach((event) => {
+            actualNormalInput.addEventListener(event, ({ target }) => {
+              switch (event) {
+                case "click":
+                  if (target.dataset.state !== "empty")
+                    target.dataset.state = "active";
+                  break;
+                case "blur":
+                  target.parentElement.querySelector(".input-error")?.remove();
+                  if (target.value === "") {
+                    createErrorMessage("Can't be empty", target.parentElement);
+                    target.dataset.state = "empty";
+                  }
+                  break;
+                case "input":
+                  target.parentElement.querySelector(".input-error")?.remove();
+                  target.dataset.state = "active";
+                  break;
+                default:
+                  break;
+              }
+            });
+          });
+
+          const addNewEditableInputContentBtn = openedWindow.querySelector(
+            ".add-new-editable-input-content-btn"
+          );
+
+          const allOldEditableContentSpots = Array.from(
+            openedWindow.querySelectorAll(".editable-input-content")
+          );
+
+          function handleDeleteEditableContentInput() {
+            allOldEditableContentSpots.forEach((column) => {
+              column.addEventListener("click", ({ target }) => {
+                if (!target.classList?.contains("delete-btn")) return;
+                target.parentElement.remove();
+                if (
+                  allOldEditableContentSpots.indexOf(target.parentElement) ===
+                  -1
+                )
+                  return;
+                allOldEditableContentSpots.splice(
+                  allOldEditableContentSpots.indexOf(target.parentElement),
+                  1
+                );
+              });
+            });
+          }
+
+          handleDeleteEditableContentInput();
+
+          addNewEditableInputContentBtn.addEventListener("click", () => {
+            createMarkup({
+              elementType: "new-editable-input-content",
+              elementToInsertInto:
+                openedWindow.querySelector(".editable-input"),
+              placeToInsert: "beforeend",
+            });
+
+            const allNewEditableContentSpots = openedWindow.querySelectorAll(
+              ".editable-input-content"
+            );
+            allOldEditableContentSpots.push(
+              allNewEditableContentSpots[allNewEditableContentSpots.length - 1]
+            );
+
+            handleDeleteEditableContentInput();
+          });
+
+          createElementBtn.addEventListener("click", () => {
+            const requiredInput = openedWindow.querySelector(
               ".actual-normal-input"
             );
-            const addNewEditableInputContentBtn = openedWindow.querySelector(
-              ".add-new-editable-input-content-btn"
-            );
-            const createNewBoardBtn = openedWindow.querySelector(
-              ".create-new-board-btn"
-            );
 
-            eventsPerformedOnInputs.forEach((event) => {
-              boardNameInput.addEventListener(event, ({ target }) => {
-                switch (event) {
-                  case "click":
-                    if (target.dataset.state !== "empty")
-                      target.dataset.state = "active";
-                    break;
-                  case "blur":
-                    target.parentElement
-                      .querySelector(".input-error")
-                      ?.remove();
-                    if (target.value === "") {
-                      createErrorMessage(
-                        "Can't be empty",
-                        target.parentElement
-                      );
-                      target.dataset.state = "empty";
-                    }
-                    if (target.value.length < 5 && target.value !== "") {
-                      createErrorMessage(
-                        "Minimum 5 characters",
-                        target.parentElement
-                      );
-                      target.dataset.state = "empty";
-                    }
-                    break;
-                  case "input":
-                    if (target.value.length === 5) {
-                      target.parentElement
-                        .querySelector(".input-error")
-                        ?.remove();
-                      target.dataset.state = "active";
-                    }
-                    break;
-                  default:
-                    break;
-                }
-              });
-            });
-
-            const allOldEditableContentSpots = Array.from(
-              openedWindow.querySelectorAll(".editable-input-content")
-            );
-
-            function handleDeleteColumns() {
-              allOldEditableContentSpots.forEach((column) => {
-                column.addEventListener("click", ({ target }) => {
-                  if (!target.classList?.contains("delete-btn")) return;
-                  target.parentElement.remove();
-                  if (
-                    allOldEditableContentSpots.indexOf(target.parentElement) ===
-                    -1
-                  )
-                    return;
-                  allOldEditableContentSpots.splice(
-                    allOldEditableContentSpots.indexOf(target.parentElement),
-                    1
-                  );
-                });
-              });
-            }
-
-            handleDeleteColumns();
-
-            addNewEditableInputContentBtn.addEventListener("click", () => {
-              createMarkup({
-                elementType: "new-editable-input-content",
-                parentElement: openedWindow.querySelector(".editable-input"),
-              });
-
-              const allNewEditableContentSpots = openedWindow.querySelectorAll(
-                ".editable-input-content"
-              );
-              allOldEditableContentSpots.push(
-                allNewEditableContentSpots[
-                  allNewEditableContentSpots.length - 1
-                ]
-              );
-
-              handleDeleteColumns();
-            });
-
-            createNewBoardBtn.addEventListener("click", () => {
-              const requiredInput = openedWindow.querySelector(
-                ".actual-normal-input"
-              );
-
-              if (
-                requiredInput.value === "" ||
-                requiredInput.value.length < 5 ||
-                allOldEditableContentSpots.some(
-                  (column) =>
-                    column.querySelector(".actual-editable-input").value === ""
-                )
+            if (
+              requiredInput.value === "" ||
+              allOldEditableContentSpots.some(
+                (column) =>
+                  column.querySelector(".actual-editable-input").value === ""
               )
-                return;
+            )
+              return;
 
+            if (openedWindow.classList?.contains("new-board-window")) {
               const newBoard = {
                 boardName: requiredInput.value,
                 columns: allOldEditableContentSpots.map((editableSpot) => {
@@ -380,7 +390,8 @@ function observeMutation() {
 
               createMarkup({
                 elementType: "new-board",
-                parentElement: allBoardsSpot,
+                elementToInsertInto: allBoardsSpot,
+                placeToInsert: "beforeend",
                 boardName: requiredInput.value,
                 boardID: ID,
                 boardState: "active",
@@ -390,7 +401,8 @@ function observeMutation() {
 
               createMarkup({
                 elementType: "board-title",
-                parentElement: document.querySelector(".board-info"),
+                placeToInsert: "afterbegin",
+                elementToInsertInto: document.querySelector(".board-info"),
                 boardName: requiredInput.value,
               });
 
@@ -404,15 +416,55 @@ function observeMutation() {
                 ".boards-num"
               ).textContent = `(${boardsNum})`;
 
-              overlay.remove();
-              openedWindow.remove();
               hint?.remove();
-            });
-          }
+            }
 
-          if (openedWindow.classList?.contains("new-column-window")) {
-            console.log("Done");
-          }
+            if (openedWindow.classList?.contains("new-column-window")) {
+              const activeBoard = app.allBoards.find(
+                (board) => board.state === "active"
+              );
+
+              if (actualNormalInput.value === "") return;
+
+              activeBoard.columns.push({
+                colName: actualNormalInput.value,
+                tasks: allOldEditableContentSpots.map((editableSpot) => {
+                  return {
+                    taskName: editableSpot.querySelector(
+                      ".actual-editable-input"
+                    ).value,
+                    subtasks: [],
+                  };
+                }),
+              });
+
+              interactWithLocalStorage("set");
+
+              createMarkup({
+                elementType: "board-column",
+                placeToInsert: "beforebegin",
+                elementToInsertInto: document.querySelector(".add-column-spot"),
+                colName: actualNormalInput.value,
+                allTasksNum: activeBoard.columns.find(
+                  (column) => column.colName === actualNormalInput.value
+                ).tasks.length,
+              });
+
+              allOldEditableContentSpots.forEach((editableSpot) => {
+                createMarkup({
+                  elementType: "new-task",
+                  placeToInsert: "beforeend",
+                  elementToInsertInto: document.querySelector(
+                    `[data-name="${actualNormalInput.value}"]`
+                  ),
+                  taskName: editableSpot.children[0].value,
+                });
+              });
+            }
+
+            overlay.remove();
+            openedWindow.remove();
+          });
 
           overlay.addEventListener("click", ({ target }) => {
             openedWindow.remove();
@@ -446,9 +498,22 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
   );
   if (choosenBoard == null) return;
   showBoardContent(choosenBoard);
+  handleBoardContent();
   app.allBoards.forEach((board) => (board.state = "disabled"));
   choosenBoard.state = "active";
   document.querySelector(".board-title").textContent = choosenBoard.boardName;
+  choosenBoard.columns.forEach((column) => {
+   column.tasks.forEach(({ taskName }) => {
+     createMarkup({
+       elementType: "new-task",
+       placeToInsert: "beforeend",
+       elementToInsertInto: document.querySelector(
+         `[data-name="${column.colName}"]`
+       ),
+       taskName,
+     });
+   });
+ });
   interactWithLocalStorage("set");
 });
 
@@ -475,7 +540,8 @@ window.addEventListener("load", () => {
   app.allBoards.forEach((board) => {
     createMarkup({
       elementType: "new-board",
-      parentElement: allBoardsSpot,
+      placeToInsert: "beforeend",
+      elementToInsertInto: allBoardsSpot,
       boardName: board.boardName,
       boardID: board.ID,
       boardState: board.state,
@@ -483,11 +549,25 @@ window.addEventListener("load", () => {
     if (board.state === "active") {
       createMarkup({
         elementType: "board-title",
-        parentElement: document.querySelector(".board-info"),
+        placeToInsert: "afterbegin",
+        elementToInsertInto: document.querySelector(".board-info"),
         boardName: board.boardName,
       });
 
       showBoardContent(board);
+
+      board.columns.forEach((column) => {
+        column.tasks.forEach(({ taskName }) => {
+          createMarkup({
+            elementType: "new-task",
+            placeToInsert: "beforeend",
+            elementToInsertInto: document.querySelector(
+              `[data-name="${column.colName}"]`
+            ),
+            taskName,
+          });
+        });
+      });
     }
   });
   handleBoardContent();
@@ -495,7 +575,11 @@ window.addEventListener("load", () => {
 
 hideSidebarBtn.addEventListener("click", () => {
   boardCreationSpot.dataset.state = "hidden";
-  createMarkup({ elementType: "sidebar-btn", parentElement: document.body });
+  createMarkup({
+    elementType: "sidebar-btn",
+    elementToInsertInto: document.body,
+    placeToInsert: "beforeend",
+  });
 });
 
 toggleModeSpot.addEventListener("click", ({ target }) => {
@@ -516,9 +600,14 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
 boardCreationBtn.addEventListener("click", ({ target }) => {
   createMarkup({
     elementType: "board-creation-window",
-    parentElement: document.body,
+    elementToInsertInto: document.body,
+    placeToInsert: "beforeend",
   });
-  createMarkup({ elementType: "overlay", parentElement: document.body });
+  createMarkup({
+    elementType: "overlay",
+    elementToInsertInto: document.body,
+    placeToInsert: "beforeend",
+  });
   target.blur();
 });
 
