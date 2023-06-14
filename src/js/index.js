@@ -1,5 +1,4 @@
 import "../sass/style.scss";
-import Board from "./board";
 const boardCreationSpot = document.querySelector(".board-creation");
 const boardContentSpot = document.querySelector(".board-content");
 const hideSidebarBtn = document.querySelector(".hide-sidebar-btn");
@@ -179,7 +178,7 @@ function createMarkup({
       break;
     case "new-task":
       element = `
-       <div class="board-column-task">
+       <div class="board-column-task" draggable="true" data-dragging="false">
          <h4 class="task-title">${taskName}</h4>
          <span class="subtasks-info"
            ><span class="done-subtasks">0 </span>of
@@ -252,6 +251,28 @@ function handleBoardContent() {
       placeToInsert: "beforeend",
     });
     target.blur();
+  });
+}
+
+function allowDragging() {
+  const allTaskElements = document.querySelectorAll(".board-column-task");
+  const allColumnSpots = document.querySelectorAll(".board-column");
+
+  allTaskElements.forEach((taskElement) => {
+    taskElement.addEventListener("dragstart", ({ target }) => {
+      target.dataset.dragging = "true";
+    });
+    taskElement.addEventListener("dragend", ({ target }) => {
+      target.dataset.dragging = "false";
+    });
+  });
+
+  allColumnSpots.forEach((columnSpot) => {
+    columnSpot.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      const draggableTask = document.querySelector(`[data-dragging="true"]`);
+      columnSpot.appendChild(draggableTask);
+    });
   });
 }
 
@@ -503,17 +524,17 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
   choosenBoard.state = "active";
   document.querySelector(".board-title").textContent = choosenBoard.boardName;
   choosenBoard.columns.forEach((column) => {
-   column.tasks.forEach(({ taskName }) => {
-     createMarkup({
-       elementType: "new-task",
-       placeToInsert: "beforeend",
-       elementToInsertInto: document.querySelector(
-         `[data-name="${column.colName}"]`
-       ),
-       taskName,
-     });
-   });
- });
+    column.tasks.forEach(({ taskName }) => {
+      createMarkup({
+        elementType: "new-task",
+        placeToInsert: "beforeend",
+        elementToInsertInto: document.querySelector(
+          `[data-name="${column.colName}"]`
+        ),
+        taskName,
+      });
+    });
+  });
   interactWithLocalStorage("set");
 });
 
@@ -568,6 +589,8 @@ window.addEventListener("load", () => {
           });
         });
       });
+
+      allowDragging();
     }
   });
   handleBoardContent();
@@ -610,10 +633,3 @@ boardCreationBtn.addEventListener("click", ({ target }) => {
   });
   target.blur();
 });
-
-// document
-// .querySelector(".overlay")
-// ?.addEventListener("click", ({ target }) => {
-//   document.querySelector(".window")?.remove();
-//   target.remove();
-// });
