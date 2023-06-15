@@ -261,6 +261,7 @@ function startDragging() {
   allDraggables.forEach((element) => {
     let oldColumnElement;
     let oldColumnObject;
+    // let oldIndex;
 
     element.addEventListener("dragstart", ({ target }) => {
       element.dataset.draggable = "true";
@@ -270,6 +271,7 @@ function startDragging() {
         .columns.find(
           (column) => column.colName === oldColumnElement.dataset.name
         );
+      // oldIndex = [...oldColumnElement.children].indexOf(target) - 1;
     });
 
     element.addEventListener("dragend", ({ target }) => {
@@ -283,9 +285,9 @@ function startDragging() {
         );
 
       if (newColumnObject.colName !== oldColumnElement.dataset.name) {
-        const choosenIndex = [...newColumnElement.children].indexOf(target) - 1;
+        const newIndex = [...newColumnElement.children].indexOf(target) - 1;
 
-        newColumnObject.tasks.splice(choosenIndex, 0, {
+        newColumnObject.tasks.splice(newIndex, 0, {
           taskName: target.children[0].textContent,
           subtasks: [],
         });
@@ -320,7 +322,6 @@ function startDragging() {
         ? column.appendChild(draggable)
         : column.insertBefore(draggable, afterElement);
     });
-    // console.log("Hello");
   });
 }
 
