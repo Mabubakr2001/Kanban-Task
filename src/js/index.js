@@ -283,7 +283,9 @@ function startDragging() {
         );
 
       if (newColumnObject.colName !== oldColumnElement.dataset.name) {
-        newColumnObject.tasks.push({
+        const choosenIndex = [...newColumnElement.children].indexOf(target) - 1;
+
+        newColumnObject.tasks.splice(choosenIndex, 0, {
           taskName: target.children[0].textContent,
           subtasks: [],
         });
@@ -292,14 +294,18 @@ function startDragging() {
           (task) => task.taskName === target.children[0].textContent
         );
 
-        //  index = newColumnObject.tasks.indexOf(
-        //   afterElement.children[0].textContent
-        // );
-
         if (needsTobeDeleted === -1) return;
 
         oldColumnObject.tasks.splice(needsTobeDeleted, 1);
       }
+
+      newColumnElement.querySelector(
+        ".tasks-num"
+      ).textContent = `(${newColumnObject.tasks.length})`;
+
+      oldColumnElement.querySelector(
+        ".tasks-num"
+      ).textContent = `(${oldColumnObject.tasks.length})`;
 
       interactWithLocalStorage("set");
     });
