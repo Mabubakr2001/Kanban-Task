@@ -178,7 +178,7 @@ function createMarkup({
       break;
     case "new-task":
       element = `
-       <div class="board-column-task" draggable="true" data-dragging="false">
+       <div class="board-column-task" draggable="true" data-draggable="false">
          <h4 class="task-title">${taskName}</h4>
          <span class="subtasks-info"
            ><span class="done-subtasks">0 </span>of
@@ -254,26 +254,84 @@ function handleBoardContent() {
   });
 }
 
-function allowDragging() {
-  const allTaskElements = document.querySelectorAll(".board-column-task");
-  const allColumnSpots = document.querySelectorAll(".board-column");
+function startDragging() {
+  const allDraggables = document.querySelectorAll(".board-column-task");
+  const allColumns = document.querySelectorAll(".board-column");
 
-  allTaskElements.forEach((taskElement) => {
-    taskElement.addEventListener("dragstart", ({ target }) => {
-      target.dataset.dragging = "true";
+  allDraggables.forEach((element) => {
+    let oldColumnElement;
+    let oldColumnObject;
+
+    element.addEventListener("dragstart", ({ target }) => {
+      element.dataset.draggable = "true";
+      oldColumnElement = target.parentElement;
+      oldColumnObject = app.allBoards
+        .find((board) => board.state === "active")
+        .columns.find(
+          (column) => column.colName === oldColumnElement.dataset.name
+        );
     });
-    taskElement.addEventListener("dragend", ({ target }) => {
-      target.dataset.dragging = "false";
+
+    element.addEventListener("dragend", ({ target }) => {
+      target.dataset.draggable = "false";
+
+      const newColumnElement = target.parentElement;
+      const newColumnObject = app.allBoards
+        .find((board) => board.state === "active")
+        .columns.find(
+          (column) => column.colName === newColumnElement.dataset.name
+        );
+
+      if (newColumnObject.colName !== oldColumnElement.dataset.name) {
+        newColumnObject.tasks.push({
+          taskName: target.children[0].textContent,
+          subtasks: [],
+        });
+
+        const needsTobeDeleted = oldColumnObject.tasks.findIndex(
+          (task) => task.taskName === target.children[0].textContent
+        );
+
+        //  index = newColumnObject.tasks.indexOf(
+        //   afterElement.children[0].textContent
+        // );
+
+        if (needsTobeDeleted === -1) return;
+
+        oldColumnObject.tasks.splice(needsTobeDeleted, 1);
+      }
+
+      interactWithLocalStorage("set");
     });
   });
 
-  allColumnSpots.forEach((columnSpot) => {
-    columnSpot.addEventListener("dragover", (event) => {
+  allColumns.forEach((column) => {
+    column.addEventListener("dragover", (event) => {
       event.preventDefault();
-      const draggableTask = document.querySelector(`[data-dragging="true"]`);
-      columnSpot.appendChild(draggableTask);
+      const draggable = document.querySelector(`[data-draggable="true"]`);
+      const afterElement = getAfterElement(column, event.clientY);
+      afterElement == null
+        ? column.appendChild(draggable)
+        : column.insertBefore(draggable, afterElement);
     });
+    // console.log("Hello");
   });
+}
+
+function getAfterElement(column, yAxis) {
+  const allUndraggable = [
+    ...column.querySelectorAll(`[data-draggable="false"]`),
+  ];
+  return allUndraggable.reduce(
+    (closest, child) => {
+      const boundingBox = child.getBoundingClientRect();
+      const offset = yAxis - boundingBox.top - boundingBox.height / 2;
+      return offset < 0 && offset > closest.offset
+        ? { offset: offset, element: child }
+        : closest;
+    },
+    { offset: Number.NEGATIVE_INFINITY }
+  ).element;
 }
 
 function observeMutation() {
@@ -590,7 +648,7 @@ window.addEventListener("load", () => {
         });
       });
 
-      allowDragging();
+      startDragging();
     }
   });
   handleBoardContent();

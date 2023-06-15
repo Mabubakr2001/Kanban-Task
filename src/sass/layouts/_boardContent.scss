@@ -69,7 +69,7 @@
       background-color: map-get(c.$colors, main_2);
       color: map-get(c.$colors, blackColor);
       box-shadow: 0 0 5px 0 rgb(155, 155, 155);
-      &[data-dragging="true"] {
+      &[data-draggable="true"] {
         background-color: map-get(c.$colors, main) !important;
         opacity: 0.5;
       }
