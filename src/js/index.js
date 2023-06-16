@@ -285,13 +285,13 @@ function startDragging() {
         );
       const newIndex = [...newColumnElement.children].indexOf(target) - 1;
 
+      oldColumnObject.tasks.splice(oldIndex, 1);
+
       const taskAlreadyExist = newColumnObject.tasks.some(
         (task) => task.taskName === target.children[0].textContent
       );
 
       if (taskAlreadyExist) return;
-
-      oldColumnObject.tasks.splice(oldIndex, 1);
 
       newColumnObject.tasks.splice(newIndex, 0, {
         taskName: target.children[0].textContent,
