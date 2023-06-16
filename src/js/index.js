@@ -277,8 +277,6 @@ function startDragging() {
     element.addEventListener("dragend", ({ target }) => {
       target.dataset.draggable = "false";
 
-      oldColumnObject.tasks.splice(oldIndex, 1);
-
       const newColumnElement = target.parentElement;
       const newColumnObject = app.allBoards
         .find((board) => board.state === "active")
@@ -286,6 +284,14 @@ function startDragging() {
           (column) => column.colName === newColumnElement.dataset.name
         );
       const newIndex = [...newColumnElement.children].indexOf(target) - 1;
+
+      const taskAlreadyExist = newColumnObject.tasks.some(
+        (task) => task.taskName === target.children[0].textContent
+      );
+
+      if (taskAlreadyExist) return;
+
+      oldColumnObject.tasks.splice(oldIndex, 1);
 
       newColumnObject.tasks.splice(newIndex, 0, {
         taskName: target.children[0].textContent,
@@ -309,6 +315,16 @@ function startDragging() {
       event.preventDefault();
       const draggable = document.querySelector(`[data-draggable="true"]`);
       const afterElement = getAfterElement(column, event.clientY);
+      const taskElementAlreadyExist = [
+        ...column.querySelectorAll(`[data-draggable="false"]`),
+      ].some(
+        (taskElement) =>
+          taskElement.children[0].textContent ===
+          draggable.children[0].textContent
+      );
+
+      if (taskElementAlreadyExist) return;
+
       afterElement == null
         ? column.appendChild(draggable)
         : column.insertBefore(draggable, afterElement);
@@ -538,7 +554,7 @@ function observeMutation() {
                 });
               });
 
-              // startDragging();
+              startDragging();
             }
 
             overlay.remove();
@@ -635,6 +651,7 @@ window.addEventListener("load", () => {
 
       showBoardContent(board);
 
+      // The problem is here
       board.columns.forEach((column) => {
         column.tasks.forEach(({ taskName }) => {
           createMarkup({
@@ -647,7 +664,6 @@ window.addEventListener("load", () => {
           });
         });
       });
-
       startDragging();
     }
   });
