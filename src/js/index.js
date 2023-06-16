@@ -553,12 +553,10 @@ function observeMutation() {
                   taskName: editableSpot.children[0].value,
                 });
               });
-
-              startDragging();
             }
-
             overlay.remove();
             openedWindow.remove();
+            startDragging();
           });
 
           overlay.addEventListener("click", ({ target }) => {
@@ -610,6 +608,7 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
     });
   });
   interactWithLocalStorage("set");
+  startDragging();
 });
 
 window.addEventListener("load", () => {
