@@ -261,7 +261,7 @@ function startDragging() {
   allDraggables.forEach((element) => {
     let oldColumnElement;
     let oldColumnObject;
-    // let oldIndex;
+    let oldIndex;
 
     element.addEventListener("dragstart", ({ target }) => {
       element.dataset.draggable = "true";
@@ -271,11 +271,13 @@ function startDragging() {
         .columns.find(
           (column) => column.colName === oldColumnElement.dataset.name
         );
-      // oldIndex = [...oldColumnElement.children].indexOf(target) - 1;
+      oldIndex = [...oldColumnElement.children].indexOf(target) - 1;
     });
 
     element.addEventListener("dragend", ({ target }) => {
       target.dataset.draggable = "false";
+
+      oldColumnObject.tasks.splice(oldIndex, 1);
 
       const newColumnElement = target.parentElement;
       const newColumnObject = app.allBoards
@@ -283,23 +285,12 @@ function startDragging() {
         .columns.find(
           (column) => column.colName === newColumnElement.dataset.name
         );
+      const newIndex = [...newColumnElement.children].indexOf(target) - 1;
 
-      if (newColumnObject.colName !== oldColumnElement.dataset.name) {
-        const newIndex = [...newColumnElement.children].indexOf(target) - 1;
-
-        newColumnObject.tasks.splice(newIndex, 0, {
-          taskName: target.children[0].textContent,
-          subtasks: [],
-        });
-
-        const needsTobeDeleted = oldColumnObject.tasks.findIndex(
-          (task) => task.taskName === target.children[0].textContent
-        );
-
-        if (needsTobeDeleted === -1) return;
-
-        oldColumnObject.tasks.splice(needsTobeDeleted, 1);
-      }
+      newColumnObject.tasks.splice(newIndex, 0, {
+        taskName: target.children[0].textContent,
+        subtasks: [],
+      });
 
       newColumnElement.querySelector(
         ".tasks-num"
@@ -546,6 +537,8 @@ function observeMutation() {
                   taskName: editableSpot.children[0].value,
                 });
               });
+
+              // startDragging();
             }
 
             overlay.remove();
