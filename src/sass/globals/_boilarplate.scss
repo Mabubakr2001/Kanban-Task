@@ -59,33 +59,61 @@ svg {
   user-select: none;
 }
 
-input {
+input,
+textarea {
   outline: none;
   border: none;
   background-color: transparent;
   font-size: rem(15px);
+  width: 100%;
+  border-radius: 5px;
 }
 
-body[data-mode="light"] input {
-  color: map-get(c.$colors, blackColor);
+input {
+  padding: 0 rem(10px);
+  height: rem(40px);
 }
 
-body[data-mode="light"] input[data-state="normal"] {
-  border: 1px solid map-get(c.$colors, blackColor);
+textarea {
+  padding: rem(10px);
+  height: rem(130px);
+  resize: none;
 }
 
-body[data-mode="dark"] input {
-  color: map-get(c.$colors, main_2);
+body[data-mode="light"] {
+  input,
+  textarea {
+    color: map-get(c.$colors, blackColor);
+  }
 }
 
-body[data-mode="dark"] input[data-state="normal"] {
-  border: 1px solid map-get(c.$colors, main_2);
+body[data-mode="light"] {
+  input[data-state="normal"],
+  textarea[data-state="normal"] {
+    border: 1px solid map-get(c.$colors, blackColor);
+  }
 }
 
-input[data-state="empty"] {
+body[data-mode="dark"] {
+  input,
+  textarea {
+    color: map-get(c.$colors, main_2);
+  }
+}
+
+body[data-mode="dark"] {
+  input[data-state="normal"],
+  textarea[data-state="normal"] {
+    border: 1px solid map-get(c.$colors, main_2);
+  }
+}
+
+input[data-state="empty"],
+textarea[data-state="empty"] {
   border: 1px solid red;
 }
 
-input[data-state="active"] {
+input[data-state="active"],
+textarea[data-state="active"] {
   border: 1px solid map-get(c.$colors, main);
 }

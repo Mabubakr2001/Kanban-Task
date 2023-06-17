@@ -152,10 +152,6 @@ function createMarkup({
       </div>
       <div class="editable-input">
         <h4>All Tasks</h4>
-        <div class="editable-input-content">
-          <input type="text" data-state="normal" class="actual-editable-input" value=""/>
-          <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
-        </div>
       </div>
       <button class="add-new-editable-input-content-btn">
         <svg
@@ -184,6 +180,80 @@ function createMarkup({
            ><span class="done-subtasks">0 </span>of
            <span class="all-subtasks">0 </span>subtasks</span
          >
+       </div>
+       `;
+      break;
+    case "task-creation-window":
+      element = `
+       <div class="window create-task-window">
+         <h3>Add New Task</h3>
+         <div class="normal-input">
+           <h4>Title</h4>
+           <input
+             type="text"
+             data-state="normal"
+             class="actual-normal-input"
+             value=""
+           />
+         </div>
+         <div class="normal-input">
+           <h4>Description</h4>
+           <textarea name="description" data-state="normal"></textarea>
+         </div>
+         <div class="editable-input">
+           <h4>All Subtasks</h4>
+           <div class="editable-input-content">
+             <input
+               type="text"
+               data-state="normal"
+               class="actual-editable-input"
+               value=""
+             />
+             <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
+           </div>
+         </div>
+         <button class="add-new-editable-input-content-btn">
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             width="25"
+             height="25"
+             fill="#fff"
+             class="bi bi-plus"
+             viewBox="0 0 16 16"
+           >
+             <path
+               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+             />
+           </svg>
+           Add New Subtask
+         </button>
+         <div class="available-columns-select" data-state="hidden">
+           <input
+             type="text"
+             value="Choose Column"
+             readonly="true"
+             class="task-choosen-column"
+           />
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             width="22"
+             height="22"
+             fill="currentColor"
+             class="bi bi-chevron-down"
+             viewBox="0 0 16 16"
+           >
+             <path
+               fill-rule="evenodd"
+               d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+             />
+           </svg>
+         </div>
+         <div class="avaliable-columns">
+           <span>Todo</span>
+           <span>Doing</span>
+           <span>Done</span>
+         </div>
+         <button class="create-element-btn">Create New Task</button>
        </div>
        `;
       break;
@@ -422,21 +492,32 @@ function observeMutation() {
           handleDeleteEditableContentInput();
 
           addNewEditableInputContentBtn.addEventListener("click", () => {
-            createMarkup({
-              elementType: "new-editable-input-content",
-              elementToInsertInto:
-                openedWindow.querySelector(".editable-input"),
-              placeToInsert: "beforeend",
-            });
+            if (openedWindow.classList?.contains("new-board-window")) {
+              createMarkup({
+                elementType: "new-editable-input-content",
+                elementToInsertInto:
+                  openedWindow.querySelector(".editable-input"),
+                placeToInsert: "beforeend",
+              });
 
-            const allNewEditableContentSpots = openedWindow.querySelectorAll(
-              ".editable-input-content"
-            );
-            allOldEditableContentSpots.push(
-              allNewEditableContentSpots[allNewEditableContentSpots.length - 1]
-            );
+              const allNewEditableContentSpots = openedWindow.querySelectorAll(
+                ".editable-input-content"
+              );
+              allOldEditableContentSpots.push(
+                allNewEditableContentSpots[
+                  allNewEditableContentSpots.length - 1
+                ]
+              );
 
-            handleDeleteEditableContentInput();
+              handleDeleteEditableContentInput();
+            }
+            if (openedWindow.classList?.contains("new-column-window")) {
+              createMarkup({
+                elementType: "task-creation-window",
+                placeToInsert: "beforeend",
+                elementToInsertInto: document.body,
+              });
+            }
           });
 
           createElementBtn.addEventListener("click", () => {

@@ -57,12 +57,6 @@
         margin-bottom: rem(10px);
         font-size: rem(15px);
       }
-      input {
-        width: 100%;
-        height: rem(40px);
-        padding: 0 rem(10px);
-        border-radius: 5px;
-      }
     }
     @at-root .input-error {
       color: red;
@@ -110,9 +104,10 @@
     justify-content: center;
     font-size: rem(17px);
     padding: 0;
-    &:nth-child(4) {
-      margin: rem(15px) auto;
-    }
+  }
+
+  .add-new-editable-input-content-btn {
+    margin: rem(15px) auto;
   }
 }
 
@@ -123,4 +118,70 @@
   width: 100%;
   height: 100%;
   background-color: #00000069;
+}
+
+.available-columns-select {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: rem(40px);
+  background-color: #828d9c54;
+  border-radius: 10px;
+  padding: 0 rem(15px);
+  cursor: pointer;
+  > {
+    input {
+      pointer-events: none;
+      font-size: 17px;
+      font-weight: 600;
+      padding: 0;
+    }
+    // svg {
+    //   transition: transform t.$mainTransition;
+    // }
+  }
+  &[data-state="visible"] {
+    svg {
+      transform: rotate(-180deg);
+    }
+    ~ .avaliable-columns {
+      pointer-events: all;
+      height: fit-content;
+    }
+  }
+  &[data-state="hidden"] {
+    ~ .avaliable-columns {
+      pointer-events: none;
+      height: 0;
+    }
+  }
+}
+
+.avaliable-columns {
+  display: flex;
+  flex-direction: column;
+  margin: 5px 0 10px 0;
+  line-height: 1.7;
+  background-color: #828d9c54;
+  border-radius: 10px;
+  // height: 120px;
+  // transition: height t.$mainTransition;
+  overflow: hidden;
+  > {
+    span {
+      border-radius: 10px;
+      height: 40px;
+      padding: 0 rem(15px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      &:hover {
+        background-color: map-get(c.$colors, main);
+      }
+    }
+  }
+  // &[data-state="hidden"] {
+  //   height: 0;
+  //   pointer-events: none;
+  // }
 }
