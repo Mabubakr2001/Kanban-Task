@@ -6,6 +6,7 @@ const toggleModeSpot = document.querySelector(".toggle-mode");
 const boardCreationBtn = document.querySelector(".board-creation-btn");
 const allBoardsSpot = document.querySelector(".all-boards");
 const hint = document.querySelector(".hint");
+const addTaskBtn = document.querySelector(".add-task-btn");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let boardsNum = 0;
@@ -152,6 +153,10 @@ function createMarkup({
       </div>
       <div class="editable-input">
         <h4>All Tasks</h4>
+        <div class="editable-input-content">
+         <input type="text" data-state="normal" class="actual-editable-input" value=""/>
+         <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
+        </div>
       </div>
       <button class="add-new-editable-input-content-btn">
         <svg
@@ -248,10 +253,8 @@ function createMarkup({
              />
            </svg>
          </div>
-         <div class="avaliable-columns">
-           <span>Todo</span>
-           <span>Doing</span>
-           <span>Done</span>
+         <div class="available-columns">
+
          </div>
          <button class="create-element-btn">Create New Task</button>
        </div>
@@ -492,34 +495,43 @@ function observeMutation() {
           handleDeleteEditableContentInput();
 
           addNewEditableInputContentBtn.addEventListener("click", () => {
-            if (openedWindow.classList?.contains("new-board-window")) {
-              createMarkup({
-                elementType: "new-editable-input-content",
-                elementToInsertInto:
-                  openedWindow.querySelector(".editable-input"),
-                placeToInsert: "beforeend",
-              });
+            createMarkup({
+              elementType: "new-editable-input-content",
+              elementToInsertInto:
+                openedWindow.querySelector(".editable-input"),
+              placeToInsert: "beforeend",
+            });
 
-              const allNewEditableContentSpots = openedWindow.querySelectorAll(
-                ".editable-input-content"
-              );
-              allOldEditableContentSpots.push(
-                allNewEditableContentSpots[
-                  allNewEditableContentSpots.length - 1
-                ]
-              );
+            const allNewEditableContentSpots = openedWindow.querySelectorAll(
+              ".editable-input-content"
+            );
+            allOldEditableContentSpots.push(
+              allNewEditableContentSpots[allNewEditableContentSpots.length - 1]
+            );
 
-              handleDeleteEditableContentInput();
-            }
-            if (openedWindow.classList?.contains("new-column-window")) {
-              createMarkup({
-                elementType: "task-creation-window",
-                placeToInsert: "beforeend",
-                elementToInsertInto: document.body,
-              });
-            }
+            handleDeleteEditableContentInput();
           });
 
+          if (openedWindow.classList.contains("create-task-window")) {
+            const availableColumnsSelect = openedWindow.querySelector(
+              ".available-columns-select"
+            );
+            const actualAvailableColumnsSpot =
+              openedWindow.querySelector(".available-columns");
+            const allColumns = [...document.querySelectorAll(".board-column")];
+            allColumns.forEach((column) =>
+              actualAvailableColumnsSpot.insertAdjacentHTML(
+                "beforeend",
+                `<span data-column="${column.dataset.name}">${column.dataset.name}</span>`
+              )
+            );
+            availableColumnsSelect.addEventListener("click", () => {
+              availableColumnsSelect.dataset.state =
+                availableColumnsSelect.dataset.state === "hidden"
+                  ? "visible"
+                  : "hidden";
+            });
+          }
           createElementBtn.addEventListener("click", () => {
             const requiredInput = openedWindow.querySelector(
               ".actual-normal-input"
@@ -635,6 +647,10 @@ function observeMutation() {
                 });
               });
             }
+
+            if (openedWindow.classList?.contains("create-task-window")) {
+              console.log("Task created!");
+            }
             overlay.remove();
             openedWindow.remove();
             startDragging();
@@ -659,6 +675,19 @@ function observeMutation() {
   });
 }
 observeMutation();
+
+addTaskBtn.addEventListener("click", () => {
+  createMarkup({
+    elementType: "overlay",
+    placeToInsert: "beforeend",
+    elementToInsertInto: document.body,
+  });
+  createMarkup({
+    elementType: "task-creation-window",
+    placeToInsert: "beforeend",
+    elementToInsertInto: document.body,
+  });
+});
 
 allBoardsSpot.addEventListener("click", ({ target }) => {
   const clickedBoard = target.closest(".created-board-name");
@@ -731,7 +760,6 @@ window.addEventListener("load", () => {
 
       showBoardContent(board);
 
-      // The problem is here
       board.columns.forEach((column) => {
         column.tasks.forEach(({ taskName }) => {
           createMarkup({

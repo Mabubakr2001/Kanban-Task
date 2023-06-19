@@ -2,7 +2,7 @@
 @use "../variables/colors" as c;
 @use "../variables/transitions" as t;
 
-.add-btn {
+.add-task-btn {
   background-color: map-get(c.$colors, main);
   border-radius: 20px;
   display: flex;
@@ -94,10 +94,13 @@
           cursor: pointer;
         }
       }
+      .task-input {
+        width: 82%;
+      }
     }
   }
   button {
-    @extend .add-btn;
+    @extend .add-task-btn;
     width: 90%;
     margin: 0 auto;
     height: 45px;
@@ -136,41 +139,42 @@
       font-weight: 600;
       padding: 0;
     }
-    // svg {
-    //   transition: transform t.$mainTransition;
-    // }
+    svg {
+      transition: transform t.$mainTransition;
+    }
   }
-  &[data-state="visible"] {
+  @at-root &[data-state="visible"] {
     svg {
       transform: rotate(-180deg);
     }
-    ~ .avaliable-columns {
+    ~ .available-columns {
       pointer-events: all;
-      height: fit-content;
+      height: 120px;
     }
   }
-  &[data-state="hidden"] {
-    ~ .avaliable-columns {
+  @at-root &[data-state="hidden"] {
+    ~ .available-columns {
       pointer-events: none;
       height: 0;
     }
   }
 }
 
-.avaliable-columns {
+.available-columns {
   display: flex;
   flex-direction: column;
   margin: 5px 0 10px 0;
   line-height: 1.7;
   background-color: #828d9c54;
   border-radius: 10px;
-  // height: 120px;
-  // transition: height t.$mainTransition;
-  overflow: hidden;
+  height: 120px;
+  transition: height t.$mainTransition;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
   > {
     span {
       border-radius: 10px;
-      height: 40px;
+      min-height: 40px;
       padding: 0 rem(15px);
       cursor: pointer;
       display: flex;
