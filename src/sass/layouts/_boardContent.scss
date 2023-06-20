@@ -84,9 +84,11 @@
       > {
         h4 {
           margin-bottom: 7px;
+          pointer-events: none;
         }
         span {
           font-size: 14px;
+          pointer-events: none;
           color: map-get(c.$colors, sub_2);
         }
       }

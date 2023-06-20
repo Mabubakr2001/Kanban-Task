@@ -29,6 +29,7 @@ function createMarkup({
   taskName = undefined,
   taskDescription = undefined,
   allSubtasksNum = undefined,
+  allDoneSubtasksNum = undefined,
   subtasksArr = undefined,
   availableColumn = undefined,
 }) {
@@ -162,10 +163,12 @@ function createMarkup({
       break;
     case "new-task":
       element = `
-       <div class="board-column-task" draggable="true" data-draggable="false">
+       <div class="board-column-task" draggable="true" data-draggable="false" data-task-name=${taskName
+         .split(" ")
+         .join("-")}>
          <h4 class="task-title">${taskName}</h4>
          <span class="subtasks-info"
-           ><span class="done-subtasks">0 </span>of
+           ><span class="done-subtasks">${allDoneSubtasksNum}</span> of
            <span class="all-subtasks">${allSubtasksNum} </span>subtasks</span
          >
        </div>
@@ -264,7 +267,9 @@ function createMarkup({
                subtasksCounter++;
                return `
             <div class="subtask" data-state="${subtask.subtaskState}">
-              <input type="checkbox" id="cb${subtasksCounter}" />
+              <input type="checkbox" id="cb${subtasksCounter}" ${
+                 subtask.subtaskState === "done" ? "checked" : ""
+               }/>
               <label for="cb${subtasksCounter}">${subtask.subtaskName}</label>
             </div>
             `;
@@ -711,7 +716,39 @@ function observeMutation() {
                   elementToInsertInto: choosenColumnSpot,
                   taskName: requiredInput.value,
                   allSubtasksNum: allOldEditableContentSpots.length,
+                  allDoneSubtasksNum: 0,
                 });
+                // The problem is here
+                // const allTasksElements = [
+                //   ...document.querySelectorAll(".board-column-task"),
+                // ];
+                // allTasksElements.forEach((taskElement) => {
+                //   taskElement.addEventListener("click", ({ target }) => {
+                //     const taskElementName = target.children[0].textContent;
+                //     const sameTaskObject = app.allBoards
+                //       .find((board) => board.state === "active")
+                //       .columns.find(
+                //         (column) =>
+                //           column.colName === target.parentElement.dataset.name
+                //       )
+                //       .tasks.find((task) => task.taskName === taskElementName);
+                //     createMarkup({
+                //       elementType: "task-info-window",
+                //       placeToInsert: "beforeend",
+                //       elementToInsertInto: document.body,
+                //       taskName: sameTaskObject.taskName,
+                //       taskDescription: sameTaskObject.taskDescription,
+                //       allSubtasksNum: sameTaskObject.subtasks.length,
+                //       subtasksArr: sameTaskObject.subtasks,
+                //       availableColumn: target.parentElement.dataset.name,
+                //     });
+                //     createMarkup({
+                //       elementType: "overlay",
+                //       placeToInsert: "beforeend",
+                //       elementToInsertInto: document.body,
+                //     });
+                //   });
+                // });
 
                 choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
               }
@@ -725,28 +762,55 @@ function observeMutation() {
             const manipulatingTaskSpot =
               openedWindow.querySelector(".manipulating-spot");
             const allSubtasksSpot = openedWindow.querySelector(".all-subtasks");
+            // I need to work here tomorrow
             manipulatingTaskSpot.addEventListener("click", () => {
               console.log("Okey!");
             });
             allSubtasksSpot.addEventListener("click", ({ target }) => {
               const clickedSubtask = target.closest(".subtask");
-              const taskElementName = clickedSubtask.children[0].textContent;
-              const sameTaskObject = app.allBoards
+              if (clickedSubtask == null) return;
+              const columnSpotName = openedWindow.querySelector(
+                ".actual-normal-input"
+              ).value;
+              const taskElementName =
+                openedWindow.querySelector(".task-name").textContent;
+              const allSubtasksArr = app.allBoards
                 .find((board) => board.state === "active")
-                .columns.find(
-                  (column) =>
-                    column.colName === target.parentElement.dataset.name
-                )
-                .tasks.find((task) => task.taskName === taskElementName);
+                .columns.find((column) => column.colName === columnSpotName)
+                .tasks.find(
+                  (task) => task.taskName === taskElementName
+                ).subtasks;
+              const taskElementThatClickedBefore = document.querySelector(
+                `[data-task-name="${openedWindow
+                  .querySelector(".task-name")
+                  .textContent.split(" ")
+                  .join("-")}"]`
+              );
+              const sameSubtaskObject = allSubtasksArr.find(
+                (subtask) =>
+                  subtask.subtaskName === clickedSubtask.children[1].textContent
+              );
               if (clickedSubtask == null) return;
               if (clickedSubtask.dataset.state === "waiting") {
-                console.log(sameTaskObject);
                 clickedSubtask.dataset.state = "done";
                 clickedSubtask.children[0].setAttribute("checked", "");
+                sameSubtaskObject.subtaskState = "done";
+                const allDoneSubtasks = allSubtasksArr.filter(
+                  (subtask) => subtask.subtaskState === "done"
+                );
+                taskElementThatClickedBefore.children[1].children[0].textContent =
+                  allDoneSubtasks.length;
               } else {
                 clickedSubtask.dataset.state = "waiting";
                 clickedSubtask.children[0].removeAttribute("checked");
+                sameSubtaskObject.subtaskState = "waiting";
+                const allDoneSubtasks = allSubtasksArr.filter(
+                  (subtask) => subtask.subtaskState === "done"
+                );
+                taskElementThatClickedBefore.children[1].children[0].textContent =
+                  allDoneSubtasks.length;
               }
+              interactWithLocalStorage("set");
             });
           }
 
@@ -809,11 +873,41 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
         ),
         taskName,
         allSubtasksNum: subtasks.length,
+        allDoneSubtasksNum: subtasks.filter(
+          (subtask) => subtask.subtaskState === "done"
+        ).length,
       });
     });
   });
   interactWithLocalStorage("set");
   startDragging();
+  const allTasksElements = [...document.querySelectorAll(".board-column-task")];
+  allTasksElements.forEach((taskElement) => {
+    taskElement.addEventListener("click", ({ target }) => {
+      const taskElementName = target.children[0].textContent;
+      const sameTaskObject = app.allBoards
+        .find((board) => board.state === "active")
+        .columns.find(
+          (column) => column.colName === target.parentElement.dataset.name
+        )
+        .tasks.find((task) => task.taskName === taskElementName);
+      createMarkup({
+        elementType: "task-info-window",
+        placeToInsert: "beforeend",
+        elementToInsertInto: document.body,
+        taskName: sameTaskObject.taskName,
+        taskDescription: sameTaskObject.taskDescription,
+        allSubtasksNum: sameTaskObject.subtasks.length,
+        subtasksArr: sameTaskObject.subtasks,
+        availableColumn: target.parentElement.dataset.name,
+      });
+      createMarkup({
+        elementType: "overlay",
+        placeToInsert: "beforeend",
+        elementToInsertInto: document.body,
+      });
+    });
+  });
 });
 
 window.addEventListener("load", () => {
@@ -865,6 +959,9 @@ window.addEventListener("load", () => {
             ),
             taskName,
             allSubtasksNum: subtasks.length,
+            allDoneSubtasksNum: subtasks.filter(
+              (subtask) => subtask.subtaskState === "done"
+            ).length,
           });
         });
       });
@@ -897,12 +994,6 @@ window.addEventListener("load", () => {
         placeToInsert: "beforeend",
         elementToInsertInto: document.body,
       });
-      // taskName = undefined,
-      // taskDescription = undefined,
-      // allSubtasksNum = undefined,
-      // subtaskName = undefined,
-      // subtaskState = undefined,
-      // availableColumn = undefined,
     });
   });
 });
