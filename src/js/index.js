@@ -11,6 +11,7 @@ const addTaskBtn = document.querySelector(".add-task-btn");
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let boardsNum = 0;
 let ID = 1;
+let subtasksCounter = 0;
 let app = {
   allBoards: [],
   mode: "light",
@@ -26,7 +27,10 @@ function createMarkup({
   colName = undefined,
   allTasksNum = undefined,
   taskName = undefined,
+  taskDescription = undefined,
   allSubtasksNum = undefined,
+  subtasksArr = undefined,
+  availableColumn = undefined,
 }) {
   let element;
   switch (elementType) {
@@ -239,6 +243,46 @@ function createMarkup({
        </div>
        `;
       break;
+    case "task-info-window":
+      element = `
+       <div class="window task-info-window">
+         <div class="task-manipulation">
+           <span class="task-name">${taskName}</span>
+           <div class="manipulating-spot">
+             <div></div>
+             <div></div>
+             <div></div>
+           </div>
+         </div>
+         <p class="task-description">
+          ${taskDescription}
+         </p>
+         <div class="all-subtasks">
+           <span>Subtasks</span>
+           ${subtasksArr
+             .map((subtask) => {
+               subtasksCounter++;
+               return `
+            <div class="subtask" data-state="${subtask.subtaskState}">
+              <input type="checkbox" id="cb${subtasksCounter}" />
+              <label for="cb${subtasksCounter}">${subtask.subtaskName}</label>
+            </div>
+            `;
+             })
+             .join("")}
+         </div>
+         <div class="current-column">
+           <span>Current Column</span>
+           <input
+             type="text"
+             readonly
+             class="actual-normal-input"
+             data-state="normal"
+             value="${availableColumn}"
+           />
+         </div>
+       </div>
+       `;
     default:
       break;
   }
@@ -474,7 +518,10 @@ function observeMutation() {
 
           handleDeleteEditableContentInput();
 
-          if (!openedWindow.classList.contains("new-column-window")) {
+          if (
+            openedWindow.classList.contains("new-board-window") ||
+            openedWindow.classList.contains("create-task-window")
+          ) {
             addNewEditableInputContentBtn.addEventListener("click", () => {
               createMarkup({
                 elementType: "new-editable-input-content",
@@ -525,147 +572,183 @@ function observeMutation() {
               }
             );
           }
-          createElementBtn.addEventListener("click", () => {
-            const requiredInput = openedWindow.querySelector(
-              ".actual-normal-input"
-            );
-
-            if (
-              requiredInput.value === "" ||
-              allOldEditableContentSpots.some(
-                (column) =>
-                  column.querySelector(".actual-editable-input").value === ""
-              )
-            )
-              return;
-
-            if (openedWindow.classList?.contains("new-board-window")) {
-              const newBoard = {
-                boardName: requiredInput.value,
-                columns: allOldEditableContentSpots.map((editableSpot) => {
-                  return {
-                    colName: editableSpot.querySelector(
-                      ".actual-editable-input"
-                    ).value,
-                    tasks: [],
-                  };
-                }),
-                state: "active",
-                ID,
-              };
-
-              const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
-                ".created-board-name"
+          if (!openedWindow.classList.contains("task-info-window")) {
+            createElementBtn.addEventListener("click", () => {
+              const requiredInput = openedWindow.querySelector(
+                ".actual-normal-input"
               );
 
-              for (let i = 0; i < allCreatedBoardElements.length; i++) {
-                if (allCreatedBoardElements[i].id == newBoard.ID) continue;
-                allCreatedBoardElements[i].dataset.state = "disabled";
+              if (
+                requiredInput.value === "" ||
+                allOldEditableContentSpots.some(
+                  (column) =>
+                    column.querySelector(".actual-editable-input").value === ""
+                )
+              )
+                return;
+
+              if (openedWindow.classList?.contains("new-board-window")) {
+                const newBoard = {
+                  boardName: requiredInput.value,
+                  columns: allOldEditableContentSpots.map((editableSpot) => {
+                    return {
+                      colName: editableSpot.querySelector(
+                        ".actual-editable-input"
+                      ).value,
+                      tasks: [],
+                    };
+                  }),
+                  state: "active",
+                  ID,
+                };
+
+                const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
+                  ".created-board-name"
+                );
+
+                for (let i = 0; i < allCreatedBoardElements.length; i++) {
+                  if (allCreatedBoardElements[i].id == newBoard.ID) continue;
+                  allCreatedBoardElements[i].dataset.state = "disabled";
+                }
+
+                app.allBoards.forEach((board) => (board.state = "disabled"));
+                app.allBoards.push(newBoard);
+                interactWithLocalStorage("set");
+
+                createMarkup({
+                  elementType: "new-board",
+                  elementToInsertInto: allBoardsSpot,
+                  placeToInsert: "beforeend",
+                  boardName: requiredInput.value,
+                  boardID: ID,
+                  boardState: "active",
+                });
+
+                document.querySelector(".board-title")?.remove();
+
+                createMarkup({
+                  elementType: "board-title",
+                  placeToInsert: "afterbegin",
+                  elementToInsertInto: document.querySelector(".board-info"),
+                  boardName: requiredInput.value,
+                });
+
+                showBoardContent(newBoard);
+                handleBoardContent();
+
+                boardsNum++;
+                ID++;
+
+                document.querySelector(
+                  ".boards-num"
+                ).textContent = `(${boardsNum})`;
+
+                hint?.remove();
               }
 
-              app.allBoards.forEach((board) => (board.state = "disabled"));
-              app.allBoards.push(newBoard);
-              interactWithLocalStorage("set");
+              if (openedWindow.classList?.contains("new-column-window")) {
+                const activeBoard = app.allBoards.find(
+                  (board) => board.state === "active"
+                );
 
-              createMarkup({
-                elementType: "new-board",
-                elementToInsertInto: allBoardsSpot,
-                placeToInsert: "beforeend",
-                boardName: requiredInput.value,
-                boardID: ID,
-                boardState: "active",
-              });
+                if (actualNormalInput.value === "") return;
 
-              document.querySelector(".board-title")?.remove();
+                activeBoard.columns.push({
+                  colName: actualNormalInput.value,
+                  tasks: [],
+                });
 
-              createMarkup({
-                elementType: "board-title",
-                placeToInsert: "afterbegin",
-                elementToInsertInto: document.querySelector(".board-info"),
-                boardName: requiredInput.value,
-              });
+                interactWithLocalStorage("set");
 
-              showBoardContent(newBoard);
-              handleBoardContent();
+                createMarkup({
+                  elementType: "board-column",
+                  placeToInsert: "beforebegin",
+                  elementToInsertInto:
+                    document.querySelector(".add-column-spot"),
+                  colName: actualNormalInput.value,
+                  allTasksNum: activeBoard.columns.find(
+                    (column) => column.colName === actualNormalInput.value
+                  ).tasks.length,
+                });
+              }
 
-              boardsNum++;
-              ID++;
+              if (openedWindow.classList?.contains("create-task-window")) {
+                const choosenColumnName = openedWindow.querySelector(
+                  ".task-choosen-column"
+                ).value;
+                if (choosenColumnName === "Choose Column") return;
+                const choosenColumnObject = app.allBoards
+                  .find((board) => board.state === "active")
+                  .columns.find(
+                    (column) => column.colName === choosenColumnName
+                  );
+                const choosenColumnSpot = document.querySelector(
+                  `.board-column[data-name="${choosenColumnName}"]`
+                );
+                const taskDescriptionTextarea =
+                  openedWindow.querySelector("textarea");
 
-              document.querySelector(
-                ".boards-num"
-              ).textContent = `(${boardsNum})`;
+                choosenColumnObject.tasks.push({
+                  taskName: requiredInput.value,
+                  taskDescription: taskDescriptionTextarea.value,
+                  subtasks: allOldEditableContentSpots.map(
+                    (editableContent) => {
+                      return {
+                        subtaskName: editableContent.querySelector(
+                          ".actual-editable-input"
+                        ).value,
+                        subtaskState: "waiting",
+                      };
+                    }
+                  ),
+                });
 
-              hint?.remove();
-            }
+                interactWithLocalStorage("set");
 
-            if (openedWindow.classList?.contains("new-column-window")) {
-              const activeBoard = app.allBoards.find(
-                (board) => board.state === "active"
-              );
+                createMarkup({
+                  elementType: "new-task",
+                  placeToInsert: "beforeend",
+                  elementToInsertInto: choosenColumnSpot,
+                  taskName: requiredInput.value,
+                  allSubtasksNum: allOldEditableContentSpots.length,
+                });
 
-              if (actualNormalInput.value === "") return;
+                choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
+              }
+              overlay.remove();
+              openedWindow.remove();
+              startDragging();
+            });
+          }
 
-              activeBoard.columns.push({
-                colName: actualNormalInput.value,
-                tasks: [],
-              });
-
-              interactWithLocalStorage("set");
-
-              createMarkup({
-                elementType: "board-column",
-                placeToInsert: "beforebegin",
-                elementToInsertInto: document.querySelector(".add-column-spot"),
-                colName: actualNormalInput.value,
-                allTasksNum: activeBoard.columns.find(
-                  (column) => column.colName === actualNormalInput.value
-                ).tasks.length,
-              });
-            }
-
-            if (openedWindow.classList?.contains("create-task-window")) {
-              const choosenColumnName = openedWindow.querySelector(
-                ".task-choosen-column"
-              ).value;
-              if (choosenColumnName === "Choose Column") return;
-              const choosenColumnObject = app.allBoards
+          if (openedWindow.classList.contains("task-info-window")) {
+            const manipulatingTaskSpot =
+              openedWindow.querySelector(".manipulating-spot");
+            const allSubtasksSpot = openedWindow.querySelector(".all-subtasks");
+            manipulatingTaskSpot.addEventListener("click", () => {
+              console.log("Okey!");
+            });
+            allSubtasksSpot.addEventListener("click", ({ target }) => {
+              const clickedSubtask = target.closest(".subtask");
+              const taskElementName = clickedSubtask.children[0].textContent;
+              const sameTaskObject = app.allBoards
                 .find((board) => board.state === "active")
-                .columns.find((column) => column.colName === choosenColumnName);
-              const choosenColumnSpot = document.querySelector(
-                `.board-column[data-name="${choosenColumnName}"]`
-              );
-              const taskDescriptionTextarea =
-                openedWindow.querySelector("textarea");
-
-              choosenColumnObject.tasks.push({
-                taskName: requiredInput.value,
-                taskDescription: taskDescriptionTextarea.value,
-                subtasks: allOldEditableContentSpots.map((editableContent) => {
-                  return {
-                    subtaskName: editableContent.querySelector(
-                      ".actual-editable-input"
-                    ).value,
-                    subtaskState: "created",
-                  };
-                }),
-              });
-
-              interactWithLocalStorage("set");
-
-              createMarkup({
-                elementType: "new-task",
-                placeToInsert: "beforeend",
-                elementToInsertInto: choosenColumnSpot,
-                taskName: requiredInput.value,
-                allSubtasksNum: allOldEditableContentSpots.length,
-              });
-
-              choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
-            }
-            overlay.remove();
-            openedWindow.remove();
-            startDragging();
-          });
+                .columns.find(
+                  (column) =>
+                    column.colName === target.parentElement.dataset.name
+                )
+                .tasks.find((task) => task.taskName === taskElementName);
+              if (clickedSubtask == null) return;
+              if (clickedSubtask.dataset.state === "waiting") {
+                console.log(sameTaskObject);
+                clickedSubtask.dataset.state = "done";
+                clickedSubtask.children[0].setAttribute("checked", "");
+              } else {
+                clickedSubtask.dataset.state = "waiting";
+                clickedSubtask.children[0].removeAttribute("checked");
+              }
+            });
+          }
 
           overlay.addEventListener("click", ({ target }) => {
             openedWindow.remove();
@@ -789,6 +872,39 @@ window.addEventListener("load", () => {
     }
   });
   handleBoardContent();
+  const allTasksElements = [...document.querySelectorAll(".board-column-task")];
+  allTasksElements.forEach((taskElement) => {
+    taskElement.addEventListener("click", ({ target }) => {
+      const taskElementName = target.children[0].textContent;
+      const sameTaskObject = app.allBoards
+        .find((board) => board.state === "active")
+        .columns.find(
+          (column) => column.colName === target.parentElement.dataset.name
+        )
+        .tasks.find((task) => task.taskName === taskElementName);
+      createMarkup({
+        elementType: "task-info-window",
+        placeToInsert: "beforeend",
+        elementToInsertInto: document.body,
+        taskName: sameTaskObject.taskName,
+        taskDescription: sameTaskObject.taskDescription,
+        allSubtasksNum: sameTaskObject.subtasks.length,
+        subtasksArr: sameTaskObject.subtasks,
+        availableColumn: target.parentElement.dataset.name,
+      });
+      createMarkup({
+        elementType: "overlay",
+        placeToInsert: "beforeend",
+        elementToInsertInto: document.body,
+      });
+      // taskName = undefined,
+      // taskDescription = undefined,
+      // allSubtasksNum = undefined,
+      // subtaskName = undefined,
+      // subtaskState = undefined,
+      // availableColumn = undefined,
+    });
+  });
 });
 
 hideSidebarBtn.addEventListener("click", () => {

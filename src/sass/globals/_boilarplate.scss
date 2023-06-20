@@ -74,6 +74,16 @@ input {
   height: rem(40px);
 }
 
+input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  // cursor: pointer;
+  // &:hover {
+  //   transform: none;
+  // }
+  pointer-events: none;
+}
+
 textarea {
   padding: rem(10px);
   height: rem(130px);

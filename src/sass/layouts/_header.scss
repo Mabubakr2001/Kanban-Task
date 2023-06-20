@@ -102,7 +102,7 @@ header {
           font-weight: 700;
         }
       }
-      .manipulating-spot {
+      @at-root .manipulating-spot {
         width: rem(6px);
         height: rem(24px);
         display: flex;
