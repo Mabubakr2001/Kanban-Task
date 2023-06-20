@@ -26,6 +26,7 @@ function createMarkup({
   colName = undefined,
   allTasksNum = undefined,
   taskName = undefined,
+  allSubtasksNum = undefined,
 }) {
   let element;
   switch (elementType) {
@@ -151,28 +152,6 @@ function createMarkup({
         <h4>Column Name</h4>
         <input type="text" data-state="normal" class="actual-normal-input" value=""/>
       </div>
-      <div class="editable-input">
-        <h4>All Tasks</h4>
-        <div class="editable-input-content">
-         <input type="text" data-state="normal" class="actual-editable-input" value=""/>
-         <img src="./assets/images/x-lg.svg" alt="" class="delete-btn"/>
-        </div>
-      </div>
-      <button class="add-new-editable-input-content-btn">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="25"
-          fill="#fff"
-          class="bi bi-plus"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
-          />
-        </svg>
-        Add New Task
-      </button>
       <button class="create-element-btn">Create New Column</button>
      </div>
        `;
@@ -183,7 +162,7 @@ function createMarkup({
          <h4 class="task-title">${taskName}</h4>
          <span class="subtasks-info"
            ><span class="done-subtasks">0 </span>of
-           <span class="all-subtasks">0 </span>subtasks</span
+           <span class="all-subtasks">${allSubtasksNum} </span>subtasks</span
          >
        </div>
        `;
@@ -358,6 +337,8 @@ function startDragging() {
         );
       const newIndex = [...newColumnElement.children].indexOf(target) - 1;
 
+      const choosenTaskObject = oldColumnObject.tasks[oldIndex];
+
       oldColumnObject.tasks.splice(oldIndex, 1);
 
       const taskAlreadyExist = newColumnObject.tasks.some(
@@ -367,8 +348,7 @@ function startDragging() {
       if (taskAlreadyExist) return;
 
       newColumnObject.tasks.splice(newIndex, 0, {
-        taskName: target.children[0].textContent,
-        subtasks: [],
+        ...choosenTaskObject,
       });
 
       newColumnElement.querySelector(
@@ -494,23 +474,27 @@ function observeMutation() {
 
           handleDeleteEditableContentInput();
 
-          addNewEditableInputContentBtn.addEventListener("click", () => {
-            createMarkup({
-              elementType: "new-editable-input-content",
-              elementToInsertInto:
-                openedWindow.querySelector(".editable-input"),
-              placeToInsert: "beforeend",
+          if (!openedWindow.classList.contains("new-column-window")) {
+            addNewEditableInputContentBtn.addEventListener("click", () => {
+              createMarkup({
+                elementType: "new-editable-input-content",
+                elementToInsertInto:
+                  openedWindow.querySelector(".editable-input"),
+                placeToInsert: "beforeend",
+              });
+
+              const allNewEditableContentSpots = openedWindow.querySelectorAll(
+                ".editable-input-content"
+              );
+              allOldEditableContentSpots.push(
+                allNewEditableContentSpots[
+                  allNewEditableContentSpots.length - 1
+                ]
+              );
+
+              handleDeleteEditableContentInput();
             });
-
-            const allNewEditableContentSpots = openedWindow.querySelectorAll(
-              ".editable-input-content"
-            );
-            allOldEditableContentSpots.push(
-              allNewEditableContentSpots[allNewEditableContentSpots.length - 1]
-            );
-
-            handleDeleteEditableContentInput();
-          });
+          }
 
           if (openedWindow.classList.contains("create-task-window")) {
             const availableColumnsSelect = openedWindow.querySelector(
@@ -519,18 +503,27 @@ function observeMutation() {
             const actualAvailableColumnsSpot =
               openedWindow.querySelector(".available-columns");
             const allColumns = [...document.querySelectorAll(".board-column")];
-            allColumns.forEach((column) =>
-              actualAvailableColumnsSpot.insertAdjacentHTML(
-                "beforeend",
-                `<span data-column="${column.dataset.name}">${column.dataset.name}</span>`
-              )
-            );
             availableColumnsSelect.addEventListener("click", () => {
               availableColumnsSelect.dataset.state =
                 availableColumnsSelect.dataset.state === "hidden"
                   ? "visible"
                   : "hidden";
             });
+            allColumns.forEach((column) =>
+              actualAvailableColumnsSpot.insertAdjacentHTML(
+                "beforeend",
+                `<span data-column="${column.dataset.name}">${column.dataset.name}</span>`
+              )
+            );
+            actualAvailableColumnsSpot.addEventListener(
+              "click",
+              ({ target }) => {
+                const choosenColumn = target.closest("[data-column]");
+                if (choosenColumn == null) return;
+                availableColumnsSelect.children[0].value =
+                  choosenColumn.dataset.column;
+              }
+            );
           }
           createElementBtn.addEventListener("click", () => {
             const requiredInput = openedWindow.querySelector(
@@ -614,14 +607,7 @@ function observeMutation() {
 
               activeBoard.columns.push({
                 colName: actualNormalInput.value,
-                tasks: allOldEditableContentSpots.map((editableSpot) => {
-                  return {
-                    taskName: editableSpot.querySelector(
-                      ".actual-editable-input"
-                    ).value,
-                    subtasks: [],
-                  };
-                }),
+                tasks: [],
               });
 
               interactWithLocalStorage("set");
@@ -635,21 +621,46 @@ function observeMutation() {
                   (column) => column.colName === actualNormalInput.value
                 ).tasks.length,
               });
-
-              allOldEditableContentSpots.forEach((editableSpot) => {
-                createMarkup({
-                  elementType: "new-task",
-                  placeToInsert: "beforeend",
-                  elementToInsertInto: document.querySelector(
-                    `[data-name="${actualNormalInput.value}"]`
-                  ),
-                  taskName: editableSpot.children[0].value,
-                });
-              });
             }
 
             if (openedWindow.classList?.contains("create-task-window")) {
-              console.log("Task created!");
+              const choosenColumnName = openedWindow.querySelector(
+                ".task-choosen-column"
+              ).value;
+              if (choosenColumnName === "Choose Column") return;
+              const choosenColumnObject = app.allBoards
+                .find((board) => board.state === "active")
+                .columns.find((column) => column.colName === choosenColumnName);
+              const choosenColumnSpot = document.querySelector(
+                `.board-column[data-name="${choosenColumnName}"]`
+              );
+              const taskDescriptionTextarea =
+                openedWindow.querySelector("textarea");
+
+              choosenColumnObject.tasks.push({
+                taskName: requiredInput.value,
+                taskDescription: taskDescriptionTextarea.value,
+                subtasks: allOldEditableContentSpots.map((editableContent) => {
+                  return {
+                    subtaskName: editableContent.querySelector(
+                      ".actual-editable-input"
+                    ).value,
+                    subtaskState: "created",
+                  };
+                }),
+              });
+
+              interactWithLocalStorage("set");
+
+              createMarkup({
+                elementType: "new-task",
+                placeToInsert: "beforeend",
+                elementToInsertInto: choosenColumnSpot,
+                taskName: requiredInput.value,
+                allSubtasksNum: allOldEditableContentSpots.length,
+              });
+
+              choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
             }
             overlay.remove();
             openedWindow.remove();
@@ -706,7 +717,7 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
   choosenBoard.state = "active";
   document.querySelector(".board-title").textContent = choosenBoard.boardName;
   choosenBoard.columns.forEach((column) => {
-    column.tasks.forEach(({ taskName }) => {
+    column.tasks.forEach(({ taskName, subtasks }) => {
       createMarkup({
         elementType: "new-task",
         placeToInsert: "beforeend",
@@ -714,6 +725,7 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
           `[data-name="${column.colName}"]`
         ),
         taskName,
+        allSubtasksNum: subtasks.length,
       });
     });
   });
@@ -761,7 +773,7 @@ window.addEventListener("load", () => {
       showBoardContent(board);
 
       board.columns.forEach((column) => {
-        column.tasks.forEach(({ taskName }) => {
+        column.tasks.forEach(({ taskName, subtasks }) => {
           createMarkup({
             elementType: "new-task",
             placeToInsert: "beforeend",
@@ -769,6 +781,7 @@ window.addEventListener("load", () => {
               `[data-name="${column.colName}"]`
             ),
             taskName,
+            allSubtasksNum: subtasks.length,
           });
         });
       });
