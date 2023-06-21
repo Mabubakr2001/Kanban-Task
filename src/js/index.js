@@ -450,6 +450,38 @@ function getAfterElement(column, yAxis) {
   ).element;
 }
 
+function handleTaskClicking() {
+  // boardContentSpot.addEventListener("click", ({ target }) => {
+  //   const clickedTaskElement = target.closest(".board-column-task");
+  //   if (clickedTaskElement == null) return;
+  //   const taskElementName = clickedTaskElement.children[0].textContent;
+  //   const sameTaskObject = app.allBoards
+  //     .find((board) => board.state === "active")
+  //     .columns.find(
+  //       (column) =>
+  //         column.colName === clickedTaskElement.parentElement.dataset.name
+  //     )
+  //     .tasks.find((task) => task.taskName === taskElementName);
+  //   createMarkup({
+  //     elementType: "task-info-window",
+  //     placeToInsert: "beforeend",
+  //     elementToInsertInto: document.body,
+  //     taskName: sameTaskObject.taskName,
+  //     taskDescription: sameTaskObject.taskDescription,
+  //     allSubtasksNum: sameTaskObject.subtasks.length,
+  //     subtasksArr: sameTaskObject.subtasks,
+  //     availableColumn: target.parentElement.dataset.name,
+  //   });
+  //   createMarkup({
+  //     elementType: "overlay",
+  //     placeToInsert: "beforeend",
+  //     elementToInsertInto: document.body,
+  //   });
+  //   clickedTaskElement.blur();
+  // });
+  console.log("Yes");
+}
+
 function observeMutation() {
   const observerOnBody = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -718,37 +750,6 @@ function observeMutation() {
                   allSubtasksNum: allOldEditableContentSpots.length,
                   allDoneSubtasksNum: 0,
                 });
-                // The problem is here
-                // const allTasksElements = [
-                //   ...document.querySelectorAll(".board-column-task"),
-                // ];
-                // allTasksElements.forEach((taskElement) => {
-                //   taskElement.addEventListener("click", ({ target }) => {
-                //     const taskElementName = target.children[0].textContent;
-                //     const sameTaskObject = app.allBoards
-                //       .find((board) => board.state === "active")
-                //       .columns.find(
-                //         (column) =>
-                //           column.colName === target.parentElement.dataset.name
-                //       )
-                //       .tasks.find((task) => task.taskName === taskElementName);
-                //     createMarkup({
-                //       elementType: "task-info-window",
-                //       placeToInsert: "beforeend",
-                //       elementToInsertInto: document.body,
-                //       taskName: sameTaskObject.taskName,
-                //       taskDescription: sameTaskObject.taskDescription,
-                //       allSubtasksNum: sameTaskObject.subtasks.length,
-                //       subtasksArr: sameTaskObject.subtasks,
-                //       availableColumn: target.parentElement.dataset.name,
-                //     });
-                //     createMarkup({
-                //       elementType: "overlay",
-                //       placeToInsert: "beforeend",
-                //       elementToInsertInto: document.body,
-                //     });
-                //   });
-                // });
 
                 choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
               }
@@ -849,7 +850,7 @@ addTaskBtn.addEventListener("click", () => {
 
 allBoardsSpot.addEventListener("click", ({ target }) => {
   const clickedBoard = target.closest(".created-board-name");
-  if (clickedBoard == null) return;
+  if (clickedBoard == null || clickedBoard.dataset.state === "active") return;
   clickedBoard.parentElement
     .querySelectorAll(".created-board-name")
     .forEach((boardNameSpot) => (boardNameSpot.dataset.state = "disabled"));
@@ -863,51 +864,27 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
   app.allBoards.forEach((board) => (board.state = "disabled"));
   choosenBoard.state = "active";
   document.querySelector(".board-title").textContent = choosenBoard.boardName;
-  choosenBoard.columns.forEach((column) => {
-    column.tasks.forEach(({ taskName, subtasks }) => {
-      createMarkup({
-        elementType: "new-task",
-        placeToInsert: "beforeend",
-        elementToInsertInto: document.querySelector(
-          `[data-name="${column.colName}"]`
-        ),
-        taskName,
-        allSubtasksNum: subtasks.length,
-        allDoneSubtasksNum: subtasks.filter(
-          (subtask) => subtask.subtaskState === "done"
-        ).length,
+  if (choosenBoard.columns.length > 0) {
+    choosenBoard.columns.forEach((column) => {
+      column.tasks.forEach(({ taskName, subtasks }) => {
+        createMarkup({
+          elementType: "new-task",
+          placeToInsert: "beforeend",
+          elementToInsertInto: document.querySelector(
+            `[data-name="${column.colName}"]`
+          ),
+          taskName,
+          allSubtasksNum: subtasks.length,
+          allDoneSubtasksNum: subtasks.filter(
+            (subtask) => subtask.subtaskState === "done"
+          ).length,
+        });
       });
     });
-  });
+    handleTaskClicking();
+    startDragging();
+  }
   interactWithLocalStorage("set");
-  startDragging();
-  const allTasksElements = [...document.querySelectorAll(".board-column-task")];
-  allTasksElements.forEach((taskElement) => {
-    taskElement.addEventListener("click", ({ target }) => {
-      const taskElementName = target.children[0].textContent;
-      const sameTaskObject = app.allBoards
-        .find((board) => board.state === "active")
-        .columns.find(
-          (column) => column.colName === target.parentElement.dataset.name
-        )
-        .tasks.find((task) => task.taskName === taskElementName);
-      createMarkup({
-        elementType: "task-info-window",
-        placeToInsert: "beforeend",
-        elementToInsertInto: document.body,
-        taskName: sameTaskObject.taskName,
-        taskDescription: sameTaskObject.taskDescription,
-        allSubtasksNum: sameTaskObject.subtasks.length,
-        subtasksArr: sameTaskObject.subtasks,
-        availableColumn: target.parentElement.dataset.name,
-      });
-      createMarkup({
-        elementType: "overlay",
-        placeToInsert: "beforeend",
-        elementToInsertInto: document.body,
-      });
-    });
-  });
 });
 
 window.addEventListener("load", () => {
@@ -965,37 +942,11 @@ window.addEventListener("load", () => {
           });
         });
       });
-      startDragging();
     }
   });
+  startDragging();
+  // handleTaskClicking();
   handleBoardContent();
-  const allTasksElements = [...document.querySelectorAll(".board-column-task")];
-  allTasksElements.forEach((taskElement) => {
-    taskElement.addEventListener("click", ({ target }) => {
-      const taskElementName = target.children[0].textContent;
-      const sameTaskObject = app.allBoards
-        .find((board) => board.state === "active")
-        .columns.find(
-          (column) => column.colName === target.parentElement.dataset.name
-        )
-        .tasks.find((task) => task.taskName === taskElementName);
-      createMarkup({
-        elementType: "task-info-window",
-        placeToInsert: "beforeend",
-        elementToInsertInto: document.body,
-        taskName: sameTaskObject.taskName,
-        taskDescription: sameTaskObject.taskDescription,
-        allSubtasksNum: sameTaskObject.subtasks.length,
-        subtasksArr: sameTaskObject.subtasks,
-        availableColumn: target.parentElement.dataset.name,
-      });
-      createMarkup({
-        elementType: "overlay",
-        placeToInsert: "beforeend",
-        elementToInsertInto: document.body,
-      });
-    });
-  });
 });
 
 hideSidebarBtn.addEventListener("click", () => {
