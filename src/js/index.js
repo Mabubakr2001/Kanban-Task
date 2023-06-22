@@ -798,13 +798,11 @@ function observeMutation() {
               const columnSpotName = openedWindow.querySelector(
                 ".actual-normal-input"
               ).value;
-              const taskElementName =
-                openedWindow.querySelector(".task-name").textContent;
               const allSubtasksArr = app.allBoards
                 .find((board) => board.state === "active")
                 .columns.find((column) => column.colName === columnSpotName)
                 .tasks.find(
-                  (task) => task.taskName === taskElementName
+                  (task) => task.taskID == openedWindow.dataset.taskId
                 ).subtasks;
               const taskElementThatClickedBefore =
                 boardContentSpot.querySelector(
@@ -885,11 +883,13 @@ window.addEventListener("load", () => {
 
   if (theAppObjectFromLocalStorage.allBoards.length === 0) return;
 
-  boardID = app.allBoards[app.allBoards.length - 1].ID + 1;
+  boardID = app.allBoards[app.allBoards.length - 1].boardID + 1;
   boardsNum = app.allBoards.length;
 
   document.querySelector(".boards-num").textContent = `(${boardsNum})`;
   hint?.remove();
+
+  let activeBoard;
 
   app.allBoards.forEach((board) => {
     createMarkup({
@@ -901,6 +901,7 @@ window.addEventListener("load", () => {
       boardState: board.state,
     });
     if (board.state === "active") {
+      activeBoard = board;
       createMarkup({
         elementType: "board-title",
         placeToInsert: "afterbegin",
@@ -932,10 +933,7 @@ window.addEventListener("load", () => {
       handleBoardContent();
     }
   });
-  taskID =
-    app.allBoards[0].columns[0]?.tasks.length != null
-      ? app.allBoards[0].columns[0]?.tasks.length + 1
-      : 1;
+  taskID = [...document.querySelectorAll(".board-column-task")].length + 1;
 });
 
 allBoardsSpot.addEventListener("click", ({ target }) => {
