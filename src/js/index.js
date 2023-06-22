@@ -10,7 +10,9 @@ const addTaskBtn = document.querySelector(".add-task-btn");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let boardsNum = 0;
-let ID = 1;
+let boardID = 1;
+let taskID = 1;
+let booleanValue = false;
 let subtasksCounter = 0;
 let app = {
   allBoards: [],
@@ -27,6 +29,7 @@ function createMarkup({
   colName = undefined,
   allTasksNum = undefined,
   taskName = undefined,
+  taskID = undefined,
   taskDescription = undefined,
   allSubtasksNum = undefined,
   allDoneSubtasksNum = undefined,
@@ -163,9 +166,7 @@ function createMarkup({
       break;
     case "new-task":
       element = `
-       <div class="board-column-task" draggable="true" data-draggable="false" data-task-name=${taskName
-         .split(" ")
-         .join("-")}>
+       <div class="board-column-task" draggable="true" data-draggable="false" data-task-id="${taskID}">
          <h4 class="task-title">${taskName}</h4>
          <span class="subtasks-info"
            ><span class="done-subtasks">${allDoneSubtasksNum}</span> of
@@ -248,7 +249,7 @@ function createMarkup({
       break;
     case "task-info-window":
       element = `
-       <div class="window task-info-window">
+       <div class="window task-info-window" data-task-id="${taskID}">
          <div class="task-manipulation">
            <span class="task-name">${taskName}</span>
            <div class="manipulating-spot">
@@ -262,19 +263,37 @@ function createMarkup({
          </p>
          <div class="all-subtasks">
            <span>Subtasks</span>
-           ${subtasksArr
-             .map((subtask) => {
-               subtasksCounter++;
-               return `
+           ${
+             subtasksArr.length > 0
+               ? subtasksArr
+                   .map((subtask) => {
+                     subtasksCounter++;
+                     return `
             <div class="subtask" data-state="${subtask.subtaskState}">
               <input type="checkbox" id="cb${subtasksCounter}" ${
-                 subtask.subtaskState === "done" ? "checked" : ""
-               }/>
+                       subtask.subtaskState === "done" ? "checked" : ""
+                     }/>
               <label for="cb${subtasksCounter}">${subtask.subtaskName}</label>
             </div>
             `;
-             })
-             .join("")}
+                   })
+                   .join("")
+               : `<div class="hint">
+                    <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="#7c67c7"
+                    class="bi bi-emoji-smile-fill"
+                    viewBox="0 0 16 16"
+                  >
+                      <path
+                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zM4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683zM10 8c-.552 0-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5S10.552 8 10 8z"
+                      />
+                    </svg>
+                    <p>There are no subtasks to show...</p>
+                  </div>`
+           }
          </div>
          <div class="current-column">
            <span>Current Column</span>
@@ -451,35 +470,36 @@ function getAfterElement(column, yAxis) {
 }
 
 function handleTaskClicking() {
-  // boardContentSpot.addEventListener("click", ({ target }) => {
-  //   const clickedTaskElement = target.closest(".board-column-task");
-  //   if (clickedTaskElement == null) return;
-  //   const taskElementName = clickedTaskElement.children[0].textContent;
-  //   const sameTaskObject = app.allBoards
-  //     .find((board) => board.state === "active")
-  //     .columns.find(
-  //       (column) =>
-  //         column.colName === clickedTaskElement.parentElement.dataset.name
-  //     )
-  //     .tasks.find((task) => task.taskName === taskElementName);
-  //   createMarkup({
-  //     elementType: "task-info-window",
-  //     placeToInsert: "beforeend",
-  //     elementToInsertInto: document.body,
-  //     taskName: sameTaskObject.taskName,
-  //     taskDescription: sameTaskObject.taskDescription,
-  //     allSubtasksNum: sameTaskObject.subtasks.length,
-  //     subtasksArr: sameTaskObject.subtasks,
-  //     availableColumn: target.parentElement.dataset.name,
-  //   });
-  //   createMarkup({
-  //     elementType: "overlay",
-  //     placeToInsert: "beforeend",
-  //     elementToInsertInto: document.body,
-  //   });
-  //   clickedTaskElement.blur();
-  // });
-  console.log("Yes");
+  if (booleanValue === true) return;
+  boardContentSpot.addEventListener("click", ({ target }) => {
+    const clickedTaskElement = target.closest(".board-column-task");
+    if (clickedTaskElement == null) return;
+    const taskElementName = clickedTaskElement.children[0].textContent;
+    const sameTaskObject = app.allBoards
+      .find((board) => board.state === "active")
+      .columns.find(
+        (column) =>
+          column.colName === clickedTaskElement.parentElement.dataset.name
+      )
+      .tasks.find((task) => task.taskName === taskElementName);
+    createMarkup({
+      elementType: "task-info-window",
+      placeToInsert: "beforeend",
+      elementToInsertInto: document.body,
+      taskName: sameTaskObject.taskName,
+      taskID: clickedTaskElement.dataset.taskId,
+      taskDescription: sameTaskObject.taskDescription,
+      allSubtasksNum: sameTaskObject.subtasks.length,
+      subtasksArr: sameTaskObject.subtasks,
+      availableColumn: target.parentElement.dataset.name,
+    });
+    createMarkup({
+      elementType: "overlay",
+      placeToInsert: "beforeend",
+      elementToInsertInto: document.body,
+    });
+  });
+  booleanValue = true;
 }
 
 function observeMutation() {
@@ -636,7 +656,7 @@ function observeMutation() {
                     };
                   }),
                   state: "active",
-                  ID,
+                  boardID,
                 };
 
                 const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
@@ -657,7 +677,7 @@ function observeMutation() {
                   elementToInsertInto: allBoardsSpot,
                   placeToInsert: "beforeend",
                   boardName: requiredInput.value,
-                  boardID: ID,
+                  boardID,
                   boardState: "active",
                 });
 
@@ -674,7 +694,7 @@ function observeMutation() {
                 handleBoardContent();
 
                 boardsNum++;
-                ID++;
+                boardID++;
 
                 document.querySelector(
                   ".boards-num"
@@ -727,6 +747,7 @@ function observeMutation() {
 
                 choosenColumnObject.tasks.push({
                   taskName: requiredInput.value,
+                  taskID,
                   taskDescription: taskDescriptionTextarea.value,
                   subtasks: allOldEditableContentSpots.map(
                     (editableContent) => {
@@ -747,15 +768,19 @@ function observeMutation() {
                   placeToInsert: "beforeend",
                   elementToInsertInto: choosenColumnSpot,
                   taskName: requiredInput.value,
+                  taskID,
                   allSubtasksNum: allOldEditableContentSpots.length,
                   allDoneSubtasksNum: 0,
                 });
+
+                taskID++;
 
                 choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
               }
               overlay.remove();
               openedWindow.remove();
               startDragging();
+              handleTaskClicking();
             });
           }
 
@@ -781,12 +806,10 @@ function observeMutation() {
                 .tasks.find(
                   (task) => task.taskName === taskElementName
                 ).subtasks;
-              const taskElementThatClickedBefore = document.querySelector(
-                `[data-task-name="${openedWindow
-                  .querySelector(".task-name")
-                  .textContent.split(" ")
-                  .join("-")}"]`
-              );
+              const taskElementThatClickedBefore =
+                boardContentSpot.querySelector(
+                  `[data-task-id="${openedWindow.dataset.taskId}"]`
+                );
               const sameSubtaskObject = allSubtasksArr.find(
                 (subtask) =>
                   subtask.subtaskName === clickedSubtask.children[1].textContent
@@ -848,45 +871,6 @@ addTaskBtn.addEventListener("click", () => {
   });
 });
 
-allBoardsSpot.addEventListener("click", ({ target }) => {
-  const clickedBoard = target.closest(".created-board-name");
-  if (clickedBoard == null || clickedBoard.dataset.state === "active") return;
-  clickedBoard.parentElement
-    .querySelectorAll(".created-board-name")
-    .forEach((boardNameSpot) => (boardNameSpot.dataset.state = "disabled"));
-  clickedBoard.dataset.state = "active";
-  const choosenBoard = app.allBoards.find(
-    (board) => board.ID == clickedBoard.id
-  );
-  if (choosenBoard == null) return;
-  showBoardContent(choosenBoard);
-  handleBoardContent();
-  app.allBoards.forEach((board) => (board.state = "disabled"));
-  choosenBoard.state = "active";
-  document.querySelector(".board-title").textContent = choosenBoard.boardName;
-  if (choosenBoard.columns.length > 0) {
-    choosenBoard.columns.forEach((column) => {
-      column.tasks.forEach(({ taskName, subtasks }) => {
-        createMarkup({
-          elementType: "new-task",
-          placeToInsert: "beforeend",
-          elementToInsertInto: document.querySelector(
-            `[data-name="${column.colName}"]`
-          ),
-          taskName,
-          allSubtasksNum: subtasks.length,
-          allDoneSubtasksNum: subtasks.filter(
-            (subtask) => subtask.subtaskState === "done"
-          ).length,
-        });
-      });
-    });
-    handleTaskClicking();
-    startDragging();
-  }
-  interactWithLocalStorage("set");
-});
-
 window.addEventListener("load", () => {
   const theAppObjectFromLocalStorage = interactWithLocalStorage("get");
 
@@ -901,7 +885,7 @@ window.addEventListener("load", () => {
 
   if (theAppObjectFromLocalStorage.allBoards.length === 0) return;
 
-  ID = app.allBoards[app.allBoards.length - 1].ID + 1;
+  boardID = app.allBoards[app.allBoards.length - 1].ID + 1;
   boardsNum = app.allBoards.length;
 
   document.querySelector(".boards-num").textContent = `(${boardsNum})`;
@@ -913,7 +897,7 @@ window.addEventListener("load", () => {
       placeToInsert: "beforeend",
       elementToInsertInto: allBoardsSpot,
       boardName: board.boardName,
-      boardID: board.ID,
+      boardID: board.boardID,
       boardState: board.state,
     });
     if (board.state === "active") {
@@ -927,7 +911,7 @@ window.addEventListener("load", () => {
       showBoardContent(board);
 
       board.columns.forEach((column) => {
-        column.tasks.forEach(({ taskName, subtasks }) => {
+        column.tasks.forEach(({ taskName, taskID, subtasks }) => {
           createMarkup({
             elementType: "new-task",
             placeToInsert: "beforeend",
@@ -935,6 +919,7 @@ window.addEventListener("load", () => {
               `[data-name="${column.colName}"]`
             ),
             taskName,
+            taskID,
             allSubtasksNum: subtasks.length,
             allDoneSubtasksNum: subtasks.filter(
               (subtask) => subtask.subtaskState === "done"
@@ -942,11 +927,55 @@ window.addEventListener("load", () => {
           });
         });
       });
+      startDragging();
+      handleTaskClicking();
+      handleBoardContent();
     }
   });
-  startDragging();
-  // handleTaskClicking();
+  taskID =
+    app.allBoards[0].columns[0]?.tasks.length != null
+      ? app.allBoards[0].columns[0]?.tasks.length + 1
+      : 1;
+});
+
+allBoardsSpot.addEventListener("click", ({ target }) => {
+  const clickedBoard = target.closest(".created-board-name");
+  if (clickedBoard == null || clickedBoard.dataset.state === "active") return;
+  clickedBoard.parentElement
+    .querySelectorAll(".created-board-name")
+    .forEach((boardNameSpot) => (boardNameSpot.dataset.state = "disabled"));
+  clickedBoard.dataset.state = "active";
+  const choosenBoard = app.allBoards.find(
+    (board) => board.boardID == clickedBoard.id
+  );
+  if (choosenBoard == null) return;
+  showBoardContent(choosenBoard);
   handleBoardContent();
+  app.allBoards.forEach((board) => (board.state = "disabled"));
+  choosenBoard.state = "active";
+  document.querySelector(".board-title").textContent = choosenBoard.boardName;
+  if (choosenBoard.columns.length > 0) {
+    choosenBoard.columns.forEach((column) => {
+      column.tasks.forEach(({ taskName, taskID, subtasks }) => {
+        createMarkup({
+          elementType: "new-task",
+          placeToInsert: "beforeend",
+          elementToInsertInto: document.querySelector(
+            `[data-name="${column.colName}"]`
+          ),
+          taskName,
+          taskID,
+          allSubtasksNum: subtasks.length,
+          allDoneSubtasksNum: subtasks.filter(
+            (subtask) => subtask.subtaskState === "done"
+          ).length,
+        });
+      });
+    });
+    handleTaskClicking();
+    startDragging();
+  }
+  interactWithLocalStorage("set");
 });
 
 hideSidebarBtn.addEventListener("click", () => {

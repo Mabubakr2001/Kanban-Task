@@ -203,6 +203,21 @@
     line-height: 1.4;
   }
   .all-subtasks {
+    .hint {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      > {
+        svg {
+          margin-right: 7px;
+        }
+        p {
+          text-align: center;
+          letter-spacing: 1px;
+          color: map-get(c.$colors, main);
+        }
+      }
+    }
     .subtask {
       background-color: map-get(c.$colors, sub_3);
       display: flex;
