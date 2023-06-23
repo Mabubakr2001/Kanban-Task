@@ -268,7 +268,7 @@
 }
 
 .basic-manipulating {
-  position: absolute;
+  position: fixed;
   transform: translate(-50%, -50%);
   background-color: map-get(c.$colors, sub_3);
   border-radius: 10px;
@@ -279,8 +279,9 @@
   height: 100px;
   padding-left: 15px;
   z-index: 100000;
+  font-size: 15px;
   .edit {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     color: map-get(c.$colors, sub_2);
     cursor: pointer;
     width: fit-content;
@@ -323,4 +324,46 @@
 .board-basic-manipulation {
   top: 120px;
   right: -80px;
+}
+
+.task-basic-manipulation {
+  top: 48%;
+  left: 57%;
+}
+
+.deletion-window {
+  > {
+    h3 {
+      color: red;
+      margin-bottom: 25px;
+    }
+    p {
+      color: map-get(c.$colors, sub_2);
+      font-size: 15px;
+      margin-bottom: 25px;
+      line-height: 1.3;
+    }
+  }
+  .btns {
+    display: flex;
+    justify-content: space-between;
+    button {
+      width: 48%;
+      margin: 0;
+    }
+    .delete-btn {
+      background-color: red;
+      &:hover {
+        background-color: rgb(192, 2, 2);
+        color: #fff;
+      }
+    }
+    .cancel-btn {
+      background-color: #fff;
+      color: map-get(c.$colors, main);
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+  }
 }

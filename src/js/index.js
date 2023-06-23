@@ -35,6 +35,7 @@ function createMarkup({
   allDoneSubtasksNum = undefined,
   subtasksArr = undefined,
   availableColumn = undefined,
+  manipulateTaskOrBoard = undefined,
 }) {
   let element;
   switch (elementType) {
@@ -190,7 +191,7 @@ function createMarkup({
          </div>
          <div class="normal-input">
            <h4>Description</h4>
-           <textarea name="description" data-state="normal"></textarea>
+           <textarea name="description" data-state="normal" data-gramm="false"></textarea>
          </div>
          <div class="editable-input">
            <h4>All Subtasks</h4>
@@ -244,6 +245,99 @@ function createMarkup({
 
          </div>
          <button class="create-element-btn">Create New Task</button>
+       </div>
+       `;
+      break;
+    case "task-edit-window":
+      element = `
+       <div class="window create-task-window" data-task-id="${taskID}">
+         <h3>Edit The Task</h3>
+         <div class="normal-input">
+           <h4>Title</h4>
+           <input
+             type="text"
+             data-state="normal"
+             class="actual-normal-input"
+             value="${taskName}"
+           />
+         </div>
+         <div class="normal-input">
+           <h4>Description</h4>
+           <textarea name="description" data-state="normal" data-gramm="false">${taskDescription}</textarea>
+         </div>
+         <div class="editable-input">
+           <h4>All Subtasks</h4>
+           ${
+             subtasksArr.length > 0
+               ? subtasksArr
+                   .map((subtask) => {
+                     subtasksCounter++;
+                     return `
+                    <div class="editable-input-content">
+                      <input
+                        type="text"
+                        data-state="normal"
+                        class="actual-editable-input"
+                        value="${subtask.subtaskName}"
+                      />
+                      <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
+                    </div>
+           `;
+                   })
+                   .join("")
+               : `
+               <div class="editable-input-content">
+                 <input
+                   type="text"
+                   data-state="normal"
+                   class="actual-editable-input"
+                   value=""
+                 />
+                 <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
+               </div>
+               `
+           }
+         </div>
+         <button class="add-new-editable-input-content-btn">
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             width="25"
+             height="25"
+             fill="#fff"
+             class="bi bi-plus"
+             viewBox="0 0 16 16"
+           >
+             <path
+               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+             />
+           </svg>
+           Add New Subtask
+         </button>
+         <div class="available-columns-select" data-state="hidden">
+           <input
+             type="text"
+             value="${availableColumn}"
+             readonly="true"
+             class="task-choosen-column"
+           />
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             width="22"
+             height="22"
+             fill="currentColor"
+             class="bi bi-chevron-down"
+             viewBox="0 0 16 16"
+           >
+             <path
+               fill-rule="evenodd"
+               d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+             />
+           </svg>
+         </div>
+         <div class="available-columns">
+
+         </div>
+         <button class="create-element-btn">Save Changes</button>
        </div>
        `;
       break;
@@ -304,6 +398,35 @@ function createMarkup({
              data-state="normal"
              value="${availableColumn}"
            />
+         </div>
+       </div>
+       `;
+      break;
+    case "basic-manipulation-window":
+      element = `
+      <div class="basic-manipulating ${manipulateTaskOrBoard.toLowerCase()}-basic-manipulation">
+        <span class="edit">Edit ${manipulateTaskOrBoard}</span>
+        <span class="delete">Delete ${manipulateTaskOrBoard}</span>
+      </div>
+       `;
+      break;
+    case "deletion-window":
+      element = `
+       <div class="window deletion-window">
+         <h3>Delete this ${manipulateTaskOrBoard.toLowerCase()}?</h3>
+         <p>
+           Are you sure you want to delete the "${
+             manipulateTaskOrBoard === "Task" ? taskName : boardName
+           }" ${manipulateTaskOrBoard.toLowerCase()}? This
+           action will remove ${
+             manipulateTaskOrBoard === "Task"
+               ? "all subtasks"
+               : "all columns and tasks"
+           } and cannot be reversed.
+         </p>
+         <div class="btns">
+           <button class="delete-btn">Delete</button>
+           <button class="cancel-btn">Cancel</button>
          </div>
        </div>
        `;
@@ -524,7 +647,7 @@ function observeMutation() {
           );
 
           eventsPerformedOnInputs.forEach((event) => {
-            actualNormalInput.addEventListener(event, ({ target }) => {
+            actualNormalInput?.addEventListener(event, ({ target }) => {
               switch (event) {
                 case "click":
                   if (target.dataset.state !== "empty")
@@ -630,7 +753,7 @@ function observeMutation() {
             );
           }
           if (!openedWindow.classList.contains("task-info-window")) {
-            createElementBtn.addEventListener("click", () => {
+            createElementBtn?.addEventListener("click", () => {
               const requiredInput = openedWindow.querySelector(
                 ".actual-normal-input"
               );
@@ -730,55 +853,99 @@ function observeMutation() {
               }
 
               if (openedWindow.classList?.contains("create-task-window")) {
-                const choosenColumnName = openedWindow.querySelector(
-                  ".task-choosen-column"
-                ).value;
-                if (choosenColumnName === "Choose Column") return;
-                const choosenColumnObject = app.allBoards
-                  .find((board) => board.state === "active")
-                  .columns.find(
-                    (column) => column.colName === choosenColumnName
+                if (!openedWindow.hasAttribute("data-task-id")) {
+                  const choosenColumnName = openedWindow.querySelector(
+                    ".task-choosen-column"
+                  ).value;
+                  if (choosenColumnName === "Choose Column") return;
+                  const choosenColumnObject = app.allBoards
+                    .find((board) => board.state === "active")
+                    .columns.find(
+                      (column) => column.colName === choosenColumnName
+                    );
+                  const choosenColumnSpot = document.querySelector(
+                    `.board-column[data-name="${choosenColumnName}"]`
                   );
-                const choosenColumnSpot = document.querySelector(
-                  `.board-column[data-name="${choosenColumnName}"]`
-                );
-                const taskDescriptionTextarea =
-                  openedWindow.querySelector("textarea");
+                  const taskDescriptionTextarea =
+                    openedWindow.querySelector("textarea");
 
-                choosenColumnObject.tasks.push({
-                  taskName: requiredInput.value,
-                  taskID,
-                  taskDescription: taskDescriptionTextarea.value,
-                  subtasks: allOldEditableContentSpots.map(
-                    (editableContent) => {
-                      return {
-                        subtaskName: editableContent.querySelector(
-                          ".actual-editable-input"
-                        ).value,
-                        subtaskState: "waiting",
-                      };
-                    }
-                  ),
-                });
+                  choosenColumnObject.tasks.push({
+                    taskName: requiredInput.value,
+                    taskID,
+                    taskDescription: taskDescriptionTextarea.value,
+                    subtasks: allOldEditableContentSpots.map(
+                      (editableContent) => {
+                        return {
+                          subtaskName: editableContent.querySelector(
+                            ".actual-editable-input"
+                          ).value,
+                          subtaskState: "waiting",
+                        };
+                      }
+                    ),
+                  });
 
-                interactWithLocalStorage("set");
+                  interactWithLocalStorage("set");
 
-                createMarkup({
-                  elementType: "new-task",
-                  placeToInsert: "beforeend",
-                  elementToInsertInto: choosenColumnSpot,
-                  taskName: requiredInput.value,
-                  taskID,
-                  allSubtasksNum: allOldEditableContentSpots.length,
-                  allDoneSubtasksNum: 0,
-                });
+                  createMarkup({
+                    elementType: "new-task",
+                    placeToInsert: "beforeend",
+                    elementToInsertInto: choosenColumnSpot,
+                    taskName: requiredInput.value,
+                    taskID,
+                    allSubtasksNum: allOldEditableContentSpots.length,
+                    allDoneSubtasksNum: 0,
+                  });
 
-                taskID++;
+                  taskID++;
 
-                choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
+                  choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
+                }
+                if (openedWindow.hasAttribute("data-task-id")) {
+                  const choosenTaskElement = document.querySelector(
+                    `.board-column-task[data-task-id="${openedWindow.dataset.taskId}"]`
+                  );
+                  const activeBoard = app.allBoards.find(
+                    (board) => board.state === "active"
+                  );
+                  const taskDescriptionTextarea =
+                    openedWindow.querySelector("textarea");
+                  let choosenTaskObject = activeBoard.columns
+                    .find(
+                      (column) =>
+                        column.colName ===
+                        openedWindow.children[5].children[0].value
+                    )
+                    .tasks.find(
+                      (task) => task.taskID == openedWindow.dataset.taskId
+                    );
+                  choosenTaskObject = {
+                    ...choosenTaskObject,
+                    taskName: requiredInput.value,
+                    taskDescription: taskDescriptionTextarea.value,
+                  };
+                  console.log(choosenTaskObject);
+                  // choosenColumnObject.tasks.push({
+                  //   taskName: requiredInput.value,
+                  //   taskID,
+                  //   taskDescription: taskDescriptionTextarea.value,
+                  //   subtasks: allOldEditableContentSpots.map(
+                  //     (editableContent) => {
+                  //       return {
+                  //         subtaskName: editableContent.querySelector(
+                  //           ".actual-editable-input"
+                  //         ).value,
+                  //         subtaskState: "waiting",
+                  //       };
+                  //     }
+                  //   ),
+                  // });
+                }
               }
               overlay.remove();
-              openedWindow.remove();
+              document
+                .querySelectorAll(".window")
+                .forEach((window) => window.remove());
               startDragging();
               handleTaskClicking();
             });
@@ -788,9 +955,18 @@ function observeMutation() {
             const manipulatingTaskSpot =
               openedWindow.querySelector(".manipulating-spot");
             const allSubtasksSpot = openedWindow.querySelector(".all-subtasks");
-            // I need to work here tomorrow
             manipulatingTaskSpot.addEventListener("click", () => {
-              console.log("Okey!");
+              const oldTaskManipulationWindow = document.querySelector(
+                ".task-basic-manipulation"
+              );
+              if (oldTaskManipulationWindow != null)
+                return oldTaskManipulationWindow.remove();
+              createMarkup({
+                elementType: "basic-manipulation-window",
+                placeToInsert: "beforeend",
+                elementToInsertInto: document.body,
+                manipulateTaskOrBoard: "Task",
+              });
             });
             allSubtasksSpot.addEventListener("click", ({ target }) => {
               const clickedSubtask = target.closest(".subtask");
@@ -838,13 +1014,60 @@ function observeMutation() {
 
           overlay.addEventListener("click", ({ target }) => {
             openedWindow.remove();
+            document.querySelector(".task-basic-manipulation")?.remove();
             target.remove();
           });
 
           window.addEventListener("keydown", ({ key }) => {
             if (key !== "Escape") return;
             openedWindow.remove();
+            document.querySelector(".task-basic-manipulation")?.remove();
             overlay.remove();
+          });
+        }
+
+        if (addedNode.classList?.contains("task-basic-manipulation")) {
+          const manipulateTaskWindow = addedNode;
+          const openedTaskWindow = document.querySelector(".task-info-window");
+          const editTaskBtn = manipulateTaskWindow.querySelector(".edit");
+          const deleteTaskBtn = manipulateTaskWindow.querySelector(".delete");
+          const activeBoard = app.allBoards.find(
+            (board) => board.state === "active"
+          );
+          const sameTaskObject = activeBoard.columns
+            .find(
+              (column) =>
+                column.colName ===
+                openedTaskWindow.children[3].children[1].defaultValue
+            )
+            .tasks.find(
+              (task) => task.taskID == openedTaskWindow.dataset.taskId
+            );
+          editTaskBtn.addEventListener("click", () => {
+            createMarkup({
+              elementType: "task-edit-window",
+              placeToInsert: "beforeend",
+              elementToInsertInto: document.body,
+              taskName: sameTaskObject.taskName,
+              taskID: sameTaskObject.taskID,
+              taskDescription: sameTaskObject.taskDescription,
+              subtasksArr: sameTaskObject.subtasks,
+              availableColumn:
+                openedTaskWindow.children[3].children[1].defaultValue,
+            });
+            manipulateTaskWindow.remove();
+          });
+          deleteTaskBtn.addEventListener("click", () => {
+            manipulateTaskWindow.remove();
+            openedTaskWindow.remove();
+            createMarkup({
+              elementType: "deletion-window",
+              placeToInsert: "beforeend",
+              elementToInsertInto: document.body,
+              boardName: activeBoard.boardName,
+              taskName: sameTaskObject.taskName,
+              manipulateTaskOrBoard: "Task",
+            });
           });
         }
       });
