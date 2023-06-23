@@ -171,7 +171,7 @@ function createMarkup({
          <h4 class="task-title">${taskName}</h4>
          <span class="subtasks-info"
            ><span class="done-subtasks">${allDoneSubtasksNum}</span> of
-           <span class="all-subtasks">${allSubtasksNum} </span>subtasks</span
+           <span class="all-subtasks">${allSubtasksNum}</span> subtasks</span
          >
        </div>
        `;
@@ -604,7 +604,7 @@ function handleTaskClicking() {
         (column) =>
           column.colName === clickedTaskElement.parentElement.dataset.name
       )
-      .tasks.find((task) => task.taskName === taskElementName);
+      .tasks.find((task) => task.taskID == clickedTaskElement.dataset.taskId);
     createMarkup({
       elementType: "task-info-window",
       placeToInsert: "beforeend",
@@ -905,41 +905,82 @@ function observeMutation() {
                   const choosenTaskElement = document.querySelector(
                     `.board-column-task[data-task-id="${openedWindow.dataset.taskId}"]`
                   );
+                  const oldColumnElementName =
+                    choosenTaskElement.parentElement.dataset.name;
                   const activeBoard = app.allBoards.find(
                     (board) => board.state === "active"
                   );
                   const taskDescriptionTextarea =
                     openedWindow.querySelector("textarea");
-                  let choosenTaskObject = activeBoard.columns
-                    .find(
-                      (column) =>
-                        column.colName ===
-                        openedWindow.children[5].children[0].value
-                    )
+                  const choosenTaskObject = activeBoard.columns
+                    .find((column) => column.colName === oldColumnElementName)
                     .tasks.find(
                       (task) => task.taskID == openedWindow.dataset.taskId
                     );
-                  choosenTaskObject = {
-                    ...choosenTaskObject,
-                    taskName: requiredInput.value,
-                    taskDescription: taskDescriptionTextarea.value,
-                  };
-                  console.log(choosenTaskObject);
-                  // choosenColumnObject.tasks.push({
-                  //   taskName: requiredInput.value,
-                  //   taskID,
-                  //   taskDescription: taskDescriptionTextarea.value,
-                  //   subtasks: allOldEditableContentSpots.map(
-                  //     (editableContent) => {
-                  //       return {
-                  //         subtaskName: editableContent.querySelector(
-                  //           ".actual-editable-input"
-                  //         ).value,
-                  //         subtaskState: "waiting",
-                  //       };
-                  //     }
-                  //   ),
-                  // });
+
+                  choosenTaskObject.taskName = requiredInput.value;
+                  choosenTaskObject.taskDescription =
+                    taskDescriptionTextarea.value;
+                  choosenTaskObject.subtasks = allOldEditableContentSpots.map(
+                    (editableContent) => {
+                      return {
+                        subtaskName: editableContent.querySelector(
+                          ".actual-editable-input"
+                        ).value,
+                        subtaskState: "waiting",
+                      };
+                    }
+                  );
+
+                  const newColumnElementName =
+                    openedWindow.children[5].children[0].value;
+                  if (oldColumnElementName !== newColumnElementName) {
+                    const oldColumnObject = activeBoard.columns.find(
+                      (column) => column.colName === oldColumnElementName
+                    );
+                    const oldColumnSpot = document.querySelector(
+                      `.board-column[data-name="${oldColumnElementName}"]`
+                    );
+                    const newColumnObject = activeBoard.columns.find(
+                      (column) => column.colName === newColumnElementName
+                    );
+                    const newColumnSpot = document.querySelector(
+                      `.board-column[data-name="${newColumnElementName}"]`
+                    );
+                    const choosenTaskObjectIndex =
+                      oldColumnObject.tasks.findIndex(
+                        (task) => task.taskID == choosenTaskObject.taskID
+                      );
+                    if (choosenTaskObjectIndex === -1) return;
+
+                    oldColumnObject.tasks.splice(choosenTaskObjectIndex, 1);
+                    choosenTaskElement.remove();
+
+                    newColumnObject.tasks.push(choosenTaskObject);
+                    createMarkup({
+                      elementType: "new-task",
+                      placeToInsert: "beforeend",
+                      elementToInsertInto: newColumnSpot,
+                      taskName: choosenTaskObject.taskName,
+                      taskID: choosenTaskObject.taskID,
+                      allSubtasksNum: allOldEditableContentSpots.length,
+                      allDoneSubtasksNum: 0,
+                    });
+
+                    oldColumnSpot.children[0].children[1].children[0].textContent = `(${oldColumnObject.tasks.length})`;
+                    newColumnSpot.children[0].children[1].children[0].textContent = `(${newColumnObject.tasks.length})`;
+                  }
+                  if (oldColumnElementName === newColumnElementName) {
+                    choosenTaskElement.children[0].textContent =
+                      choosenTaskObject.taskName;
+                    choosenTaskElement.children[1].children[0].textContent =
+                      choosenTaskObject.subtasks.filter(
+                        (subtask) => subtask.subtaskState === "done"
+                      ).length;
+                    choosenTaskElement.children[1].children[1].textContent =
+                      choosenTaskObject.subtasks.length;
+                  }
+                  interactWithLocalStorage("set");
                 }
               }
               overlay.remove();
