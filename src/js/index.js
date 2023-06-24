@@ -1014,6 +1014,25 @@ function observeMutation() {
                         targetBoardObject.columns[index].colName;
                     });
 
+                  if (
+                    document.querySelectorAll(".board-column").length <
+                    targetBoardObject.columns.length
+                  ) {
+                    createMarkup({
+                      elementType: "board-column",
+                      placeToInsert: "beforebegin",
+                      elementToInsertInto:
+                        document.querySelector(".add-column-spot"),
+                      colName:
+                        targetBoardObject.columns[
+                          targetBoardObject.columns.length - 1
+                        ].colName,
+                      allTasksNum:
+                        targetBoardObject.columns[
+                          targetBoardObject.columns.length - 1
+                        ].tasks.length,
+                    });
+                  }
                   interactWithLocalStorage("set");
                 }
               }
