@@ -1,6 +1,7 @@
 import "../sass/style.scss";
 const boardCreationSpot = document.querySelector(".board-creation");
 const boardContentSpot = document.querySelector(".board-content");
+const manipulationSpot = document.querySelector(".manipulating-spot");
 const hideSidebarBtn = document.querySelector(".hide-sidebar-btn");
 const toggleModeSpot = document.querySelector(".toggle-mode");
 const boardCreationBtn = document.querySelector(".board-creation-btn");
@@ -27,6 +28,7 @@ function createMarkup({
   boardID = undefined,
   boardState = undefined,
   colName = undefined,
+  columnsArr = undefined,
   allTasksNum = undefined,
   taskName = undefined,
   taskID = undefined,
@@ -97,6 +99,65 @@ function createMarkup({
      </div>
       `;
       break;
+    case "board-edit-window":
+      element = `
+       <div class="window new-board-window" data-board-id="${boardID}">
+         <h3>Edit The Board</h3>
+         <div class="normal-input">
+           <h4>Board Name</h4>
+           <input type="text" data-state="normal" class="actual-normal-input" value="${boardName}"/>
+         </div>
+         <div class="editable-input">
+           <h4>Board Columns</h4>
+           ${
+             columnsArr.length > 0
+               ? columnsArr
+                   .map((column) => {
+                     return `
+                   <div class="editable-input-content">
+                     <input
+                       type="text"
+                       data-state="normal"
+                       class="actual-editable-input"
+                       value="${column.colName}"
+                     />
+                     <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
+                   </div>
+          `;
+                   })
+                   .join("")
+               : `
+              <div class="editable-input-content">
+                <input
+                  type="text"
+                  data-state="normal"
+                  class="actual-editable-input"
+                  value=""
+                />
+                <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
+              </div>
+              `
+           }
+         </div>
+         <button class="add-new-editable-input-content-btn">
+           <svg
+             xmlns="http://www.w3.org/2000/svg"
+             width="25"
+             height="25"
+             fill="#fff"
+             class="bi bi-plus"
+             viewBox="0 0 16 16"
+           >
+             <path
+               d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"
+             />
+           </svg>
+           Add New Column
+         </button>
+         <button class="create-element-btn">Save Changes</button>
+        </div>
+       `;
+      break;
     case "new-editable-input-content":
       element = `
        <div class="editable-input-content">
@@ -126,7 +187,7 @@ function createMarkup({
         <div class="board-column-info">
           <div class="column-logo"></div>
           <span class="column-name"
-            >${colName} <span class="tasks-num">(${allTasksNum})</span></span
+            >${colName}<span class="tasks-num"> (${allTasksNum})</span></span
           >
         </div>
       </div>
@@ -430,6 +491,7 @@ function createMarkup({
          </div>
        </div>
        `;
+      break;
     default:
       break;
   }
@@ -656,6 +718,34 @@ function handleTaskDeletion({ openedWindow, taskID, choosenColumn }) {
   }
 }
 
+function handleBoardDeletion({ openedWindow, boardID }) {
+  if (openedWindow.classList.contains("deletion-window")) {
+    openedWindow.addEventListener("click", ({ target }) => {
+      const clickedBtn = target.closest(".btn");
+      if (clickedBtn == null) return;
+      if (clickedBtn.classList.contains("delete-btn")) {
+        console.log(`Delete board ${boardID}`);
+      }
+      openedWindow.remove();
+      document.querySelector(".overlay")?.remove();
+    });
+  }
+}
+
+manipulationSpot.addEventListener("click", () => {
+  const oldTaskManipulationWindow = document.querySelector(
+    ".board-basic-manipulation"
+  );
+  if (oldTaskManipulationWindow != null)
+    return oldTaskManipulationWindow.remove();
+  createMarkup({
+    elementType: "basic-manipulation-window",
+    placeToInsert: "beforeend",
+    elementToInsertInto: document.body,
+    manipulateTaskOrBoard: "Board",
+  });
+});
+
 function observeMutation() {
   const observerOnBody = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -710,8 +800,8 @@ function observeMutation() {
           );
 
           function handleDeleteEditableContentInput() {
-            allOldEditableContentSpots.forEach((column) => {
-              column.addEventListener("click", ({ target }) => {
+            allOldEditableContentSpots.forEach((contentSpot) => {
+              contentSpot.addEventListener("click", ({ target }) => {
                 if (!target.classList?.contains("delete-btn")) return;
                 target.parentElement.remove();
                 if (
@@ -723,6 +813,24 @@ function observeMutation() {
                   allOldEditableContentSpots.indexOf(target.parentElement),
                   1
                 );
+                if (openedWindow.hasAttribute("data-board-id")) {
+                  const activeBoard = app.allBoards.find(
+                    (board) => board.state === "active"
+                  );
+                  if (target.parentElement.children[0].value === "") return;
+                  const targetColumnObjectIndex = activeBoard.columns.findIndex(
+                    (column) =>
+                      column.colName === target.parentElement.children[0].value
+                  );
+                  if (targetColumnObjectIndex === -1) return;
+                  activeBoard.columns.splice(targetColumnObjectIndex, 1);
+                  document
+                    .querySelector(
+                      `.board-column[data-name="${target.parentElement.children[0].value}"]`
+                    )
+                    .remove();
+                  interactWithLocalStorage("set");
+                }
               });
             });
           }
@@ -799,62 +907,115 @@ function observeMutation() {
                 return;
 
               if (openedWindow.classList?.contains("new-board-window")) {
-                const newBoard = {
-                  boardName: requiredInput.value,
-                  columns: allOldEditableContentSpots.map((editableSpot) => {
-                    return {
-                      colName: editableSpot.querySelector(
-                        ".actual-editable-input"
-                      ).value,
-                      tasks: [],
-                    };
-                  }),
-                  state: "active",
-                  boardID,
-                };
+                if (!openedWindow.hasAttribute("data-board-id")) {
+                  const newBoard = {
+                    boardName: requiredInput.value,
+                    columns: allOldEditableContentSpots.map((editableSpot) => {
+                      return {
+                        colName: editableSpot.querySelector(
+                          ".actual-editable-input"
+                        ).value,
+                        tasks: [],
+                      };
+                    }),
+                    state: "active",
+                    boardID,
+                  };
 
-                const allCreatedBoardElements = allBoardsSpot.querySelectorAll(
-                  ".created-board-name"
-                );
+                  const allCreatedBoardElements =
+                    allBoardsSpot.querySelectorAll(".created-board-name");
 
-                for (let i = 0; i < allCreatedBoardElements.length; i++) {
-                  if (allCreatedBoardElements[i].id == newBoard.ID) continue;
-                  allCreatedBoardElements[i].dataset.state = "disabled";
+                  for (let i = 0; i < allCreatedBoardElements.length; i++) {
+                    if (allCreatedBoardElements[i].id == newBoard.ID) continue;
+                    allCreatedBoardElements[i].dataset.state = "disabled";
+                  }
+
+                  app.allBoards.forEach((board) => (board.state = "disabled"));
+                  app.allBoards.push(newBoard);
+                  interactWithLocalStorage("set");
+
+                  createMarkup({
+                    elementType: "new-board",
+                    elementToInsertInto: allBoardsSpot,
+                    placeToInsert: "beforeend",
+                    boardName: requiredInput.value,
+                    boardID,
+                    boardState: "active",
+                  });
+
+                  document.querySelector(".board-title")?.remove();
+
+                  createMarkup({
+                    elementType: "board-title",
+                    placeToInsert: "afterbegin",
+                    elementToInsertInto: document.querySelector(".board-info"),
+                    boardName: requiredInput.value,
+                  });
+
+                  showBoardContent(newBoard);
+                  handleBoardContent();
+
+                  boardsNum++;
+                  boardID++;
+
+                  document.querySelector(
+                    ".boards-num"
+                  ).textContent = `(${boardsNum})`;
+
+                  hint?.remove();
                 }
+                if (openedWindow.hasAttribute("data-board-id")) {
+                  const targetBoardObject = app.allBoards.find(
+                    (board) => board.boardID == openedWindow.dataset.boardId
+                  );
+                  targetBoardObject.boardName = requiredInput.value;
+                  targetBoardObject.columns = allOldEditableContentSpots.map(
+                    (editableSpot, index) => {
+                      const actualInputField = editableSpot.querySelector(
+                        ".actual-editable-input"
+                      );
+                      const targetColumn = targetBoardObject.columns.find(
+                        (column) => column.colName === actualInputField.value
+                      );
 
-                app.allBoards.forEach((board) => (board.state = "disabled"));
-                app.allBoards.push(newBoard);
-                interactWithLocalStorage("set");
+                      if (targetColumn != null) {
+                        return {
+                          colName: actualInputField.value,
+                          tasks: targetColumn.tasks,
+                        };
+                      } else if (
+                        targetColumn == null &&
+                        targetBoardObject.columns[index] != null
+                      ) {
+                        return {
+                          colName: actualInputField.value,
+                          tasks: targetBoardObject.columns[index].tasks,
+                        };
+                      } else {
+                        return {
+                          colName: actualInputField.value,
+                          tasks: [],
+                        };
+                      }
+                    }
+                  );
 
-                createMarkup({
-                  elementType: "new-board",
-                  elementToInsertInto: allBoardsSpot,
-                  placeToInsert: "beforeend",
-                  boardName: requiredInput.value,
-                  boardID,
-                  boardState: "active",
-                });
+                  document.querySelector(
+                    `.created-board-name[data-state="active"]`
+                  ).children[1].textContent = targetBoardObject.boardName;
 
-                document.querySelector(".board-title")?.remove();
+                  document.querySelector(".board-title").textContent =
+                    targetBoardObject.boardName;
 
-                createMarkup({
-                  elementType: "board-title",
-                  placeToInsert: "afterbegin",
-                  elementToInsertInto: document.querySelector(".board-info"),
-                  boardName: requiredInput.value,
-                });
+                  document
+                    .querySelectorAll(".column-name")
+                    .forEach((columnName, index) => {
+                      columnName.childNodes[0].textContent =
+                        targetBoardObject.columns[index].colName;
+                    });
 
-                showBoardContent(newBoard);
-                handleBoardContent();
-
-                boardsNum++;
-                boardID++;
-
-                document.querySelector(
-                  ".boards-num"
-                ).textContent = `(${boardsNum})`;
-
-                hint?.remove();
+                  interactWithLocalStorage("set");
+                }
               }
 
               if (openedWindow.classList?.contains("new-column-window")) {
@@ -1148,6 +1309,50 @@ function observeMutation() {
             });
           });
         }
+
+        if (addedNode.classList?.contains("board-basic-manipulation")) {
+          const manipulateBoardWindow = addedNode;
+          const editBoardBtn = manipulateBoardWindow.querySelector(".edit");
+          const deleteBoardBtn = manipulateBoardWindow.querySelector(".delete");
+          const activeBoard = app.allBoards.find(
+            (board) => board.state === "active"
+          );
+          editBoardBtn.addEventListener("click", () => {
+            createMarkup({
+              elementType: "board-edit-window",
+              placeToInsert: "beforeend",
+              elementToInsertInto: document.body,
+              boardName: activeBoard.boardName,
+              boardID: activeBoard.boardID,
+              columnsArr: activeBoard.columns,
+            });
+            createMarkup({
+              elementType: "overlay",
+              placeToInsert: "beforeend",
+              elementToInsertInto: document.body,
+            });
+            manipulateBoardWindow.remove();
+          });
+          deleteBoardBtn.addEventListener("click", () => {
+            manipulateBoardWindow.remove();
+            createMarkup({
+              elementType: "deletion-window",
+              placeToInsert: "beforeend",
+              elementToInsertInto: document.body,
+              boardName: activeBoard.boardName,
+              manipulateTaskOrBoard: "Board",
+            });
+            createMarkup({
+              elementType: "overlay",
+              placeToInsert: "beforeend",
+              elementToInsertInto: document.body,
+            });
+            handleBoardDeletion({
+              openedWindow: document.querySelector(".deletion-window"),
+              boardID: activeBoard.boardID,
+            });
+          });
+        }
       });
     });
   });
@@ -1190,8 +1395,6 @@ window.addEventListener("load", () => {
   document.querySelector(".boards-num").textContent = `(${boardsNum})`;
   hint?.remove();
 
-  // let activeBoard;
-
   app.allBoards.forEach((board) => {
     createMarkup({
       elementType: "new-board",
@@ -1202,7 +1405,6 @@ window.addEventListener("load", () => {
       boardState: board.state,
     });
     if (board.state === "active") {
-      // activeBoard = board;
       createMarkup({
         elementType: "board-title",
         placeToInsert: "afterbegin",
