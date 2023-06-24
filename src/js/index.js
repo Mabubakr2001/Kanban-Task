@@ -492,6 +492,14 @@ function createMarkup({
        </div>
        `;
       break;
+    case "hint-message":
+      element = `
+       <p class="hint">
+         There are no columns, click <span>Create New Board</span> on the left
+         side to start!
+       </p>
+       `;
+      break;
     default:
       break;
   }
@@ -545,6 +553,7 @@ function showBoardContent(choosenBoard) {
 function handleBoardContent() {
   const addColumnSpot = document.querySelector(".add-column-spot");
   addColumnSpot?.addEventListener("click", ({ target }) => {
+    document.querySelector(".board-basic-manipulation")?.remove();
     createMarkup({
       elementType: "new-column-creation-window",
       elementToInsertInto: document.body,
@@ -606,11 +615,11 @@ function startDragging() {
 
       newColumnElement.querySelector(
         ".tasks-num"
-      ).textContent = `(${newColumnObject.tasks.length})`;
+      ).textContent = ` (${newColumnObject.tasks.length})`;
 
       oldColumnElement.querySelector(
         ".tasks-num"
-      ).textContent = `(${oldColumnObject.tasks.length})`;
+      ).textContent = ` (${oldColumnObject.tasks.length})`;
 
       interactWithLocalStorage("set");
     });
@@ -659,7 +668,7 @@ function handleTaskClicking() {
   boardContentSpot.addEventListener("click", ({ target }) => {
     const clickedTaskElement = target.closest(".board-column-task");
     if (clickedTaskElement == null) return;
-    const taskElementName = clickedTaskElement.children[0].textContent;
+    document.querySelector(".board-basic-manipulation")?.remove();
     const sameTaskObject = app.allBoards
       .find((board) => board.state === "active")
       .columns.find(
@@ -724,7 +733,69 @@ function handleBoardDeletion({ openedWindow, boardID }) {
       const clickedBtn = target.closest(".btn");
       if (clickedBtn == null) return;
       if (clickedBtn.classList.contains("delete-btn")) {
-        console.log(`Delete board ${boardID}`);
+        const targetBoardObject = app.allBoards.find(
+          (board) => board.boardID == boardID
+        );
+        const targetBoardElement = document.getElementById(
+          `${targetBoardObject.boardID}`
+        );
+        const targetBoardObjectIndex = app.allBoards.findIndex(
+          (board) => board.boardID == boardID
+        );
+        if (targetBoardObjectIndex === -1) return;
+        if (app.allBoards[targetBoardObjectIndex + 1] != null) {
+          const nextBoardObject = app.allBoards[targetBoardObjectIndex + 1];
+          const nextBoardElement = document.getElementById(
+            `${nextBoardObject.boardID}`
+          );
+          nextBoardObject.state = "active";
+          nextBoardElement.dataset.state = "active";
+          document.querySelector(".board-title").textContent =
+            nextBoardObject.boardName;
+
+          showBoardContent(nextBoardObject);
+
+          nextBoardObject.columns.forEach((column) => {
+            column.tasks.forEach(({ taskName, taskID, subtasks }) => {
+              createMarkup({
+                elementType: "new-task",
+                placeToInsert: "beforeend",
+                elementToInsertInto: document.querySelector(
+                  `[data-name="${column.colName}"]`
+                ),
+                taskName,
+                taskID,
+                allSubtasksNum: subtasks.length,
+                allDoneSubtasksNum: subtasks.filter(
+                  (subtask) => subtask.subtaskState === "done"
+                ).length,
+              });
+            });
+          });
+          startDragging();
+          handleTaskClicking();
+          handleBoardContent();
+        }
+
+        app.allBoards.splice(targetBoardObjectIndex, 1);
+        targetBoardElement.remove();
+        interactWithLocalStorage("set");
+
+        document.querySelector(
+          ".boards-num"
+        ).textContent = `(${app.allBoards.length})`;
+
+        if (app.allBoards.length === 0) {
+          [...document.querySelector(".board-content").children].forEach(
+            (child) => child.remove()
+          );
+          document.querySelector(".board-title").remove();
+          createMarkup({
+            elementType: "hint-message",
+            placeToInsert: "beforeend",
+            elementToInsertInto: document.querySelector(".board-content"),
+          });
+        }
       }
       openedWindow.remove();
       document.querySelector(".overlay")?.remove();
@@ -1044,6 +1115,15 @@ function observeMutation() {
 
                 if (actualNormalInput.value === "") return;
 
+                if (
+                  [...document.querySelectorAll(".board-column")].find(
+                    (column) => column.dataset.name === actualNormalInput.value
+                  )
+                )
+                  return createErrorMessage(
+                    "This column is already exist!",
+                    openedWindow.children[1]
+                  );
                 activeBoard.columns.push({
                   colName: actualNormalInput.value,
                   tasks: [],
@@ -1110,7 +1190,7 @@ function observeMutation() {
 
                   taskID++;
 
-                  choosenColumnSpot.children[0].children[1].children[0].textContent = `(${choosenColumnObject.tasks.length})`;
+                  choosenColumnSpot.children[0].children[1].children[0].textContent = ` (${choosenColumnObject.tasks.length})`;
                 }
                 if (openedWindow.hasAttribute("data-task-id")) {
                   const choosenTaskElement = document.querySelector(
@@ -1217,7 +1297,7 @@ function observeMutation() {
               createMarkup({
                 elementType: "basic-manipulation-window",
                 placeToInsert: "beforeend",
-                elementToInsertInto: document.body,
+                elementToInsertInto: openedWindow,
                 manipulateTaskOrBoard: "Task",
               });
             });
@@ -1382,6 +1462,7 @@ function observeMutation() {
 observeMutation();
 
 addTaskBtn.addEventListener("click", () => {
+  document.querySelector(".board-basic-manipulation")?.remove();
   createMarkup({
     elementType: "overlay",
     placeToInsert: "beforeend",
@@ -1523,6 +1604,7 @@ toggleModeSpot.addEventListener("click", ({ target }) => {
 });
 
 boardCreationBtn.addEventListener("click", ({ target }) => {
+  document.querySelector(".board-basic-manipulation")?.remove();
   createMarkup({
     elementType: "board-creation-window",
     elementToInsertInto: document.body,
