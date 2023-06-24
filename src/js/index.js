@@ -425,8 +425,8 @@ function createMarkup({
            } and cannot be reversed.
          </p>
          <div class="btns">
-           <button class="delete-btn">Delete</button>
-           <button class="cancel-btn">Cancel</button>
+           <button class="btn delete-btn">Delete</button>
+           <button class="btn cancel-btn">Cancel</button>
          </div>
        </div>
        `;
@@ -623,6 +623,37 @@ function handleTaskClicking() {
     });
   });
   booleanValue = true;
+}
+
+function handleTaskDeletion({ openedWindow, taskID, choosenColumn }) {
+  if (openedWindow.classList.contains("deletion-window")) {
+    openedWindow.addEventListener("click", ({ target }) => {
+      const clickedBtn = target.closest(".btn");
+      if (clickedBtn == null) return;
+      if (clickedBtn.classList.contains("delete-btn")) {
+        const tasksArray = app.allBoards
+          .find((board) => board.state === "active")
+          .columns.find((column) => column.colName === choosenColumn).tasks;
+        const choosenTaskObjectIndex = tasksArray.findIndex(
+          (task) => task.taskID == taskID
+        );
+        const chooseTaskElement = document.querySelector(
+          `.board-column-task[data-task-id="${taskID}"]`
+        );
+
+        if (choosenTaskObjectIndex === -1) return;
+
+        tasksArray.splice(choosenTaskObjectIndex, 1);
+        chooseTaskElement.remove();
+        document.querySelector(
+          ".tasks-num"
+        ).textContent = `(${tasksArray.length})`;
+        interactWithLocalStorage("set");
+      }
+      openedWindow.remove();
+      document.querySelector(".overlay")?.remove();
+    });
+  }
 }
 
 function observeMutation() {
@@ -983,6 +1014,7 @@ function observeMutation() {
                   interactWithLocalStorage("set");
                 }
               }
+
               overlay.remove();
               document
                 .querySelectorAll(".window")
@@ -1109,6 +1141,11 @@ function observeMutation() {
               taskName: sameTaskObject.taskName,
               manipulateTaskOrBoard: "Task",
             });
+            handleTaskDeletion({
+              openedWindow: document.querySelector(".deletion-window"),
+              taskID: sameTaskObject.taskID,
+              choosenColumn: openedTaskWindow.children[3].children[1].value,
+            });
           });
         }
       });
@@ -1153,7 +1190,7 @@ window.addEventListener("load", () => {
   document.querySelector(".boards-num").textContent = `(${boardsNum})`;
   hint?.remove();
 
-  let activeBoard;
+  // let activeBoard;
 
   app.allBoards.forEach((board) => {
     createMarkup({
@@ -1165,7 +1202,7 @@ window.addEventListener("load", () => {
       boardState: board.state,
     });
     if (board.state === "active") {
-      activeBoard = board;
+      // activeBoard = board;
       createMarkup({
         elementType: "board-title",
         placeToInsert: "afterbegin",

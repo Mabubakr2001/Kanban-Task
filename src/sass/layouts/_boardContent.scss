@@ -9,6 +9,7 @@
   display: flex;
   column-gap: 20px;
   overflow: scroll;
+  position: relative;
   @at-root body[data-mode="dark"] & {
     border-top: 1px solid #3e3f4e;
     color: map-get(c.$colors, main_2);
