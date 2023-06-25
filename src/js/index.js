@@ -777,9 +777,47 @@ function handleBoardDeletion({ openedWindow, boardID }) {
           handleBoardContent();
         }
 
+        if (
+          app.allBoards[targetBoardObjectIndex + 1] == null &&
+          app.allBoards[targetBoardObjectIndex - 1] != null
+        ) {
+          const previousBoardObject = app.allBoards[targetBoardObjectIndex - 1];
+          const previousBoardElement = document.getElementById(
+            `${previousBoardObject.boardID}`
+          );
+          previousBoardObject.state = "active";
+          previousBoardElement.dataset.state = "active";
+          document.querySelector(".board-title").textContent =
+            previousBoardObject.boardName;
+
+          showBoardContent(previousBoardObject);
+
+          previousBoardObject.columns.forEach((column) => {
+            column.tasks.forEach(({ taskName, taskID, subtasks }) => {
+              createMarkup({
+                elementType: "new-task",
+                placeToInsert: "beforeend",
+                elementToInsertInto: document.querySelector(
+                  `[data-name="${column.colName}"]`
+                ),
+                taskName,
+                taskID,
+                allSubtasksNum: subtasks.length,
+                allDoneSubtasksNum: subtasks.filter(
+                  (subtask) => subtask.subtaskState === "done"
+                ).length,
+              });
+            });
+          });
+          startDragging();
+          handleTaskClicking();
+          handleBoardContent();
+        }
+
         app.allBoards.splice(targetBoardObjectIndex, 1);
         targetBoardElement.remove();
         interactWithLocalStorage("set");
+        boardsNum = app.allBoards.length;
 
         document.querySelector(
           ".boards-num"
@@ -804,11 +842,11 @@ function handleBoardDeletion({ openedWindow, boardID }) {
 }
 
 manipulationSpot.addEventListener("click", () => {
-  const oldTaskManipulationWindow = document.querySelector(
+  const oldBoardManipulationWindow = document.querySelector(
     ".board-basic-manipulation"
   );
-  if (oldTaskManipulationWindow != null)
-    return oldTaskManipulationWindow.remove();
+  if (oldBoardManipulationWindow != null)
+    return oldBoardManipulationWindow.remove();
   createMarkup({
     elementType: "basic-manipulation-window",
     placeToInsert: "beforeend",
@@ -979,6 +1017,18 @@ function observeMutation() {
 
               if (openedWindow.classList?.contains("new-board-window")) {
                 if (!openedWindow.hasAttribute("data-board-id")) {
+                  if (
+                    [...document.querySelectorAll(".created-board-name")].find(
+                      (board) =>
+                        board.children[1].textContent ===
+                        actualNormalInput.value
+                    )
+                  )
+                    return createErrorMessage(
+                      "This board is already exist!",
+                      openedWindow.children[1]
+                    );
+
                   const newBoard = {
                     boardName: requiredInput.value,
                     columns: allOldEditableContentSpots.map((editableSpot) => {
@@ -1280,8 +1330,8 @@ function observeMutation() {
                       allDoneSubtasksNum: 0,
                     });
 
-                    oldColumnSpot.children[0].children[1].children[0].textContent = `(${oldColumnObject.tasks.length})`;
-                    newColumnSpot.children[0].children[1].children[0].textContent = `(${newColumnObject.tasks.length})`;
+                    oldColumnSpot.children[0].children[1].children[0].textContent = ` (${oldColumnObject.tasks.length})`;
+                    newColumnSpot.children[0].children[1].children[0].textContent = ` (${newColumnObject.tasks.length})`;
                   }
                   if (oldColumnElementName === newColumnElementName) {
                     choosenTaskElement.children[0].textContent =
@@ -1307,6 +1357,60 @@ function observeMutation() {
           }
 
           if (openedWindow.classList.contains("task-info-window")) {
+            const observer2 = new MutationObserver((mutations) => {
+              const taskManipulationWindow = [...mutations[0].addedNodes].find(
+                (node) => node.classList?.contains("task-basic-manipulation")
+              );
+              const openedTaskWindow =
+                document.querySelector(".task-info-window");
+              const editTaskBtn = taskManipulationWindow.querySelector(".edit");
+              const deleteTaskBtn =
+                taskManipulationWindow.querySelector(".delete");
+              const activeBoard = app.allBoards.find(
+                (board) => board.state === "active"
+              );
+              const sameTaskObject = activeBoard.columns
+                .find(
+                  (column) =>
+                    column.colName ===
+                    openedTaskWindow.children[3].children[1].defaultValue
+                )
+                .tasks.find(
+                  (task) => task.taskID == openedTaskWindow.dataset.taskId
+                );
+              editTaskBtn.addEventListener("click", () => {
+                createMarkup({
+                  elementType: "task-edit-window",
+                  placeToInsert: "beforeend",
+                  elementToInsertInto: document.body,
+                  taskName: sameTaskObject.taskName,
+                  taskID: sameTaskObject.taskID,
+                  taskDescription: sameTaskObject.taskDescription,
+                  subtasksArr: sameTaskObject.subtasks,
+                  availableColumn:
+                    openedTaskWindow.children[3].children[1].defaultValue,
+                });
+              });
+              deleteTaskBtn.addEventListener("click", () => {
+                openedTaskWindow.remove();
+                createMarkup({
+                  elementType: "deletion-window",
+                  placeToInsert: "beforeend",
+                  elementToInsertInto: document.body,
+                  boardName: activeBoard.boardName,
+                  taskName: sameTaskObject.taskName,
+                  manipulateTaskOrBoard: "Task",
+                });
+                handleTaskDeletion({
+                  openedWindow: document.querySelector(".deletion-window"),
+                  taskID: sameTaskObject.taskID,
+                  choosenColumn: openedTaskWindow.children[3].children[1].value,
+                });
+              });
+            });
+            observer2.observe(openedWindow, {
+              childList: true,
+            });
             const manipulatingTaskSpot =
               openedWindow.querySelector(".manipulating-spot");
             const allSubtasksSpot = openedWindow.querySelector(".all-subtasks");
@@ -1378,56 +1482,6 @@ function observeMutation() {
             openedWindow.remove();
             document.querySelector(".task-basic-manipulation")?.remove();
             overlay.remove();
-          });
-        }
-
-        if (addedNode.classList?.contains("task-basic-manipulation")) {
-          const manipulateTaskWindow = addedNode;
-          const openedTaskWindow = document.querySelector(".task-info-window");
-          const editTaskBtn = manipulateTaskWindow.querySelector(".edit");
-          const deleteTaskBtn = manipulateTaskWindow.querySelector(".delete");
-          const activeBoard = app.allBoards.find(
-            (board) => board.state === "active"
-          );
-          const sameTaskObject = activeBoard.columns
-            .find(
-              (column) =>
-                column.colName ===
-                openedTaskWindow.children[3].children[1].defaultValue
-            )
-            .tasks.find(
-              (task) => task.taskID == openedTaskWindow.dataset.taskId
-            );
-          editTaskBtn.addEventListener("click", () => {
-            createMarkup({
-              elementType: "task-edit-window",
-              placeToInsert: "beforeend",
-              elementToInsertInto: document.body,
-              taskName: sameTaskObject.taskName,
-              taskID: sameTaskObject.taskID,
-              taskDescription: sameTaskObject.taskDescription,
-              subtasksArr: sameTaskObject.subtasks,
-              availableColumn:
-                openedTaskWindow.children[3].children[1].defaultValue,
-            });
-            manipulateTaskWindow.remove();
-          });
-          deleteTaskBtn.addEventListener("click", () => {
-            manipulateTaskWindow.remove();
-            openedTaskWindow.remove();
-            createMarkup({
-              elementType: "deletion-window",
-              placeToInsert: "beforeend",
-              elementToInsertInto: document.body,
-              boardName: activeBoard.boardName,
-              taskName: sameTaskObject.taskName,
-              manipulateTaskOrBoard: "Task",
-            });
-            handleTaskDeletion({
-              openedWindow: document.querySelector(".deletion-window"),
-              taskID: sameTaskObject.taskID,
-              choosenColumn: openedTaskWindow.children[3].children[1].value,
-            });
           });
         }
 
@@ -1564,6 +1618,7 @@ window.addEventListener("load", () => {
 });
 
 allBoardsSpot.addEventListener("click", ({ target }) => {
+  document.querySelector(".board-basic-manipulation")?.remove();
   const clickedBoard = target.closest(".created-board-name");
   if (clickedBoard == null || clickedBoard.dataset.state === "active") return;
   clickedBoard.parentElement
