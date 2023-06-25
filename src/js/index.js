@@ -604,7 +604,7 @@ function startDragging() {
       oldColumnObject.tasks.splice(oldIndex, 1);
 
       const taskAlreadyExist = newColumnObject.tasks.some(
-        (task) => task.taskName === target.children[0].textContent
+        (task) => task.taskID == target.dataset.taskId
       );
 
       if (taskAlreadyExist) return;
@@ -634,8 +634,7 @@ function startDragging() {
         ...column.querySelectorAll(`[data-draggable="false"]`),
       ].some(
         (taskElement) =>
-          taskElement.children[0].textContent ===
-          draggable?.children[0].textContent
+          taskElement.dataset.taskId === draggable?.dataset.taskId
       );
 
       if (taskElementAlreadyExist || !(draggable instanceof Node)) return;
@@ -676,6 +675,7 @@ function handleTaskClicking() {
           column.colName === clickedTaskElement.parentElement.dataset.name
       )
       .tasks.find((task) => task.taskID == clickedTaskElement.dataset.taskId);
+    if (sameTaskObject == null) return;
     createMarkup({
       elementType: "task-info-window",
       placeToInsert: "beforeend",
