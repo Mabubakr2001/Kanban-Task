@@ -716,9 +716,9 @@ function handleTaskDeletion({ openedWindow, taskID, choosenColumn }) {
 
         tasksArray.splice(choosenTaskObjectIndex, 1);
         chooseTaskElement.remove();
-        document.querySelector(
-          ".tasks-num"
-        ).textContent = `(${tasksArray.length})`;
+        document
+          .querySelector(`.board-column[data-name="${choosenColumn}"]`)
+          .querySelector(".tasks-num").textContent = ` (${tasksArray.length})`;
         interactWithLocalStorage("set");
       }
       openedWindow.remove();
