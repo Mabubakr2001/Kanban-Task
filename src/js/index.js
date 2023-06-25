@@ -598,7 +598,10 @@ function startDragging() {
 
       const choosenTaskObject = oldColumnObject.tasks[oldIndex];
 
+      // The problem is here
       oldColumnObject.tasks.splice(oldIndex, 1);
+
+      console.log(choosenTaskObject);
 
       if (choosenTaskObject == null) return;
 
