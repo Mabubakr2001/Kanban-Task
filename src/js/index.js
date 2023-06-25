@@ -11,8 +11,6 @@ const addTaskBtn = document.querySelector(".add-task-btn");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let boardsNum = 0;
-let boardID = 1;
-let taskID = 1;
 let booleanValue = false;
 let subtasksCounter = 0;
 let app = {
@@ -571,7 +569,6 @@ function handleBoardContent() {
 function startDragging() {
   const allDraggables = document.querySelectorAll(".board-column-task");
   const allColumns = document.querySelectorAll(".board-column");
-
   allDraggables.forEach((element) => {
     let oldColumnElement;
     let oldColumnObject;
@@ -603,11 +600,7 @@ function startDragging() {
 
       oldColumnObject.tasks.splice(oldIndex, 1);
 
-      const taskAlreadyExist = newColumnObject.tasks.some(
-        (task) => task.taskID == target.dataset.taskId
-      );
-
-      if (taskAlreadyExist) return;
+      if (choosenTaskObject == null) return;
 
       newColumnObject.tasks.splice(newIndex, 0, {
         ...choosenTaskObject,
@@ -630,14 +623,8 @@ function startDragging() {
       event.preventDefault();
       const draggable = document.querySelector(`[data-draggable="true"]`);
       const afterElement = getAfterElement(column, event.clientY);
-      const taskElementAlreadyExist = [
-        ...column.querySelectorAll(`[data-draggable="false"]`),
-      ].some(
-        (taskElement) =>
-          taskElement.dataset.taskId === draggable?.dataset.taskId
-      );
 
-      if (taskElementAlreadyExist || !(draggable instanceof Node)) return;
+      if (!(draggable instanceof Node)) return;
 
       afterElement == null
         ? column.appendChild(draggable)
@@ -1029,6 +1016,8 @@ function observeMutation() {
                       openedWindow.children[1]
                     );
 
+                  const randomBoardID =
+                    Math.floor(Math.random() * 1000000000) + 1;
                   const newBoard = {
                     boardName: requiredInput.value,
                     columns: allOldEditableContentSpots.map((editableSpot) => {
@@ -1040,7 +1029,7 @@ function observeMutation() {
                       };
                     }),
                     state: "active",
-                    boardID,
+                    boardID: randomBoardID,
                   };
 
                   const allCreatedBoardElements =
@@ -1060,7 +1049,7 @@ function observeMutation() {
                     elementToInsertInto: allBoardsSpot,
                     placeToInsert: "beforeend",
                     boardName: requiredInput.value,
-                    boardID,
+                    boardID: randomBoardID,
                     boardState: "active",
                   });
 
@@ -1077,7 +1066,6 @@ function observeMutation() {
                   handleBoardContent();
 
                   boardsNum++;
-                  boardID++;
 
                   document.querySelector(
                     ".boards-num"
@@ -1231,10 +1219,10 @@ function observeMutation() {
                   );
                   const taskDescriptionTextarea =
                     openedWindow.querySelector("textarea");
-
+                  const randomID = Math.floor(Math.random() * 1000000000) + 1;
                   choosenColumnObject.tasks.push({
                     taskName: requiredInput.value,
-                    taskID,
+                    taskID: randomID,
                     taskDescription: taskDescriptionTextarea.value,
                     subtasks: allOldEditableContentSpots.map(
                       (editableContent) => {
@@ -1255,12 +1243,10 @@ function observeMutation() {
                     placeToInsert: "beforeend",
                     elementToInsertInto: choosenColumnSpot,
                     taskName: requiredInput.value,
-                    taskID,
+                    taskID: randomID,
                     allSubtasksNum: allOldEditableContentSpots.length,
                     allDoneSubtasksNum: 0,
                   });
-
-                  taskID++;
 
                   choosenColumnSpot.children[0].children[1].children[0].textContent = ` (${choosenColumnObject.tasks.length})`;
                 }
@@ -1567,7 +1553,6 @@ window.addEventListener("load", () => {
 
   if (theAppObjectFromLocalStorage.allBoards.length === 0) return;
 
-  boardID = app.allBoards[app.allBoards.length - 1].boardID + 1;
   boardsNum = app.allBoards.length;
 
   document.querySelector(".boards-num").textContent = `(${boardsNum})`;
@@ -1614,7 +1599,6 @@ window.addEventListener("load", () => {
       handleBoardContent();
     }
   });
-  taskID = [...document.querySelectorAll(".board-column-task")].length + 1;
 });
 
 allBoardsSpot.addEventListener("click", ({ target }) => {
