@@ -635,10 +635,10 @@ function startDragging() {
       ].some(
         (taskElement) =>
           taskElement.children[0].textContent ===
-          draggable.children[0].textContent
+          draggable?.children[0].textContent
       );
 
-      if (taskElementAlreadyExist) return;
+      if (taskElementAlreadyExist || !(draggable instanceof Node)) return;
 
       afterElement == null
         ? column.appendChild(draggable)
@@ -1036,6 +1036,28 @@ function observeMutation() {
                   hint?.remove();
                 }
                 if (openedWindow.hasAttribute("data-board-id")) {
+                  const allActualInputs = [
+                    ...openedWindow.querySelectorAll(".actual-editable-input"),
+                  ];
+
+                  let foundSameColName = false;
+
+                  for (let i = 0; i < allActualInputs.length; i++) {
+                    for (let j = i + 1; j < allActualInputs.length; j++) {
+                      if (allActualInputs[i].value === allActualInputs[j].value)
+                        return (foundSameColName = true);
+                    }
+                  }
+
+                  // const foundSameColName = allActualInputs.some(
+                  //   (input, index) =>
+                  //     allActualInputs
+                  //       .slice(index + 1)
+                  //       .some((otherInput) => input.value === otherInput.value)
+                  // );
+
+                  if (foundSameColName) return;
+
                   const targetBoardObject = app.allBoards.find(
                     (board) => board.boardID == openedWindow.dataset.boardId
                   );
@@ -1089,20 +1111,20 @@ function observeMutation() {
                     document.querySelectorAll(".board-column").length <
                     targetBoardObject.columns.length
                   ) {
-                    createMarkup({
-                      elementType: "board-column",
-                      placeToInsert: "beforebegin",
-                      elementToInsertInto:
-                        document.querySelector(".add-column-spot"),
-                      colName:
-                        targetBoardObject.columns[
-                          targetBoardObject.columns.length - 1
-                        ].colName,
-                      allTasksNum:
-                        targetBoardObject.columns[
-                          targetBoardObject.columns.length - 1
-                        ].tasks.length,
-                    });
+                    for (
+                      let i = document.querySelectorAll(".board-column").length;
+                      i < targetBoardObject.columns.length;
+                      i++
+                    ) {
+                      createMarkup({
+                        elementType: "board-column",
+                        placeToInsert: "beforebegin",
+                        elementToInsertInto:
+                          document.querySelector(".add-column-spot"),
+                        colName: targetBoardObject.columns[i].colName,
+                        allTasksNum: targetBoardObject.columns[i].tasks.length,
+                      });
+                    }
                   }
                   interactWithLocalStorage("set");
                 }
@@ -1417,6 +1439,7 @@ function observeMutation() {
             (board) => board.state === "active"
           );
           editBoardBtn.addEventListener("click", () => {
+            if (app.allBoards.length === 0) return;
             createMarkup({
               elementType: "board-edit-window",
               placeToInsert: "beforeend",
@@ -1433,6 +1456,7 @@ function observeMutation() {
             manipulateBoardWindow.remove();
           });
           deleteBoardBtn.addEventListener("click", () => {
+            if (app.allBoards.length === 0) return;
             manipulateBoardWindow.remove();
             createMarkup({
               elementType: "deletion-window",
