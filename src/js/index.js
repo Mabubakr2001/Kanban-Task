@@ -11,8 +11,8 @@ const addTaskBtn = document.querySelector(".add-task-btn");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let boardsNum = 0;
-let booleanValueForTaskClicking = false;
-let booleanValueForTaskDragging = false;
+let taskWasClicked = false;
+let taskWasDragged = false;
 let subtasksCounter = 0;
 let app = {
   allBoards: [],
@@ -577,7 +577,7 @@ function startDragging() {
 
   allDraggables.forEach((element) => {
     element.addEventListener("dragstart", ({ target }) => {
-      booleanValueForTaskDragging = false;
+      taskWasDragged = false;
       element.dataset.draggable = "true";
       oldColumnElement = target.parentElement;
       oldColumnObject = app.allBoards
@@ -591,7 +591,7 @@ function startDragging() {
     element.addEventListener("dragend", ({ target }) => {
       target.dataset.draggable = "false";
 
-      if (booleanValueForTaskDragging === true) return;
+      if (taskWasDragged === true) return;
 
       const newColumnElement = target.parentElement;
       const newColumnObject = app.allBoards
@@ -609,7 +609,7 @@ function startDragging() {
 
       console.log(target.dataset.taskId == choosenTaskObject.taskID);
 
-      booleanValueForTaskDragging = true;
+      taskWasDragged = true;
 
       newColumnObject.tasks.splice(newIndex, 0, { ...choosenTaskObject });
 
@@ -657,7 +657,7 @@ function getAfterElement(column, yAxis) {
 }
 
 function handleTaskClicking() {
-  if (booleanValueForTaskClicking === true) return;
+  if (taskWasClicked === true) return;
   boardContentSpot.addEventListener("click", ({ target }) => {
     const clickedTaskElement = target.closest(".board-column-task");
     if (clickedTaskElement == null) return;
@@ -687,7 +687,7 @@ function handleTaskClicking() {
       elementToInsertInto: document.body,
     });
   });
-  booleanValueForTaskClicking = true;
+  taskWasClicked = true;
 }
 
 function handleTaskDeletion({ openedWindow, taskID, choosenColumn }) {
@@ -879,7 +879,7 @@ function observeMutation() {
                   break;
                 case "blur":
                   target.parentElement.querySelector(".input-error")?.remove();
-                  if (target.value === "") {
+                  if (target.value.trim() === "") {
                     createErrorMessage("Can't be empty", target.parentElement);
                     target.dataset.state = "empty";
                   }
@@ -907,15 +907,6 @@ function observeMutation() {
               contentSpot.addEventListener("click", ({ target }) => {
                 if (!target.classList?.contains("delete-btn")) return;
                 target.parentElement.remove();
-                if (
-                  allOldEditableContentSpots.indexOf(target.parentElement) ===
-                  -1
-                )
-                  return;
-                allOldEditableContentSpots.splice(
-                  allOldEditableContentSpots.indexOf(target.parentElement),
-                  1
-                );
                 if (openedWindow.hasAttribute("data-board-id")) {
                   const activeBoard = app.allBoards.find(
                     (board) => board.state === "active"
@@ -925,15 +916,31 @@ function observeMutation() {
                     (column) =>
                       column.colName === target.parentElement.children[0].value
                   );
-                  if (targetColumnObjectIndex === -1) return;
-                  activeBoard.columns.splice(targetColumnObjectIndex, 1);
-                  document
-                    .querySelector(
-                      `.board-column[data-name="${target.parentElement.children[0].value}"]`
-                    )
-                    .remove();
-                  interactWithLocalStorage("set");
+
+                  if (
+                    targetColumnObjectIndex !== -1 &&
+                    targetColumnObjectIndex ==
+                      allOldEditableContentSpots.indexOf(target.parentElement)
+                  ) {
+                    activeBoard.columns.splice(targetColumnObjectIndex, 1);
+                    document
+                      .querySelector(
+                        `.board-column[data-name="${target.parentElement.children[0].value}"]`
+                      )
+                      .remove();
+                    interactWithLocalStorage("set");
+                  }
                 }
+
+                if (
+                  allOldEditableContentSpots.indexOf(target.parentElement) ===
+                  -1
+                )
+                  return;
+                allOldEditableContentSpots.splice(
+                  allOldEditableContentSpots.indexOf(target.parentElement),
+                  1
+                );
               });
             });
           }
@@ -1001,10 +1008,12 @@ function observeMutation() {
               );
 
               if (
-                requiredInput.value === "" ||
+                requiredInput.value.trim() === "" ||
                 allOldEditableContentSpots.some(
                   (column) =>
-                    column.querySelector(".actual-editable-input").value === ""
+                    column
+                      .querySelector(".actual-editable-input")
+                      .value.trim() === ""
                 )
               )
                 return;
