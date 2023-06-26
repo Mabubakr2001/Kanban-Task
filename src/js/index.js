@@ -11,7 +11,8 @@ const addTaskBtn = document.querySelector(".add-task-btn");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let boardsNum = 0;
-let booleanValue = false;
+let booleanValueForTaskClicking = false;
+let booleanValueForTaskDragging = false;
 let subtasksCounter = 0;
 let app = {
   allBoards: [],
@@ -569,12 +570,14 @@ function handleBoardContent() {
 function startDragging() {
   const allDraggables = document.querySelectorAll(".board-column-task");
   const allColumns = document.querySelectorAll(".board-column");
-  allDraggables.forEach((element) => {
-    let oldColumnElement;
-    let oldColumnObject;
-    let oldIndex;
 
+  let oldColumnElement;
+  let oldColumnObject;
+  let oldIndex;
+
+  allDraggables.forEach((element) => {
     element.addEventListener("dragstart", ({ target }) => {
+      booleanValueForTaskDragging = false;
       element.dataset.draggable = "true";
       oldColumnElement = target.parentElement;
       oldColumnObject = app.allBoards
@@ -588,6 +591,8 @@ function startDragging() {
     element.addEventListener("dragend", ({ target }) => {
       target.dataset.draggable = "false";
 
+      if (booleanValueForTaskDragging === true) return;
+
       const newColumnElement = target.parentElement;
       const newColumnObject = app.allBoards
         .find((board) => board.state === "active")
@@ -598,16 +603,15 @@ function startDragging() {
 
       const choosenTaskObject = oldColumnObject.tasks[oldIndex];
 
-      // The problem is here
       oldColumnObject.tasks.splice(oldIndex, 1);
-
-      console.log(choosenTaskObject);
 
       if (choosenTaskObject == null) return;
 
-      newColumnObject.tasks.splice(newIndex, 0, {
-        ...choosenTaskObject,
-      });
+      console.log(target.dataset.taskId == choosenTaskObject.taskID);
+
+      booleanValueForTaskDragging = true;
+
+      newColumnObject.tasks.splice(newIndex, 0, { ...choosenTaskObject });
 
       newColumnElement.querySelector(
         ".tasks-num"
@@ -653,7 +657,7 @@ function getAfterElement(column, yAxis) {
 }
 
 function handleTaskClicking() {
-  if (booleanValue === true) return;
+  if (booleanValueForTaskClicking === true) return;
   boardContentSpot.addEventListener("click", ({ target }) => {
     const clickedTaskElement = target.closest(".board-column-task");
     if (clickedTaskElement == null) return;
@@ -683,7 +687,7 @@ function handleTaskClicking() {
       elementToInsertInto: document.body,
     });
   });
-  booleanValue = true;
+  booleanValueForTaskClicking = true;
 }
 
 function handleTaskDeletion({ openedWindow, taskID, choosenColumn }) {
