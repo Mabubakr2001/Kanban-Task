@@ -119,6 +119,7 @@ function createMarkup({
                        data-state="normal"
                        class="actual-editable-input"
                        value="${column.colName}"
+                       readonly
                      />
                      <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
                    </div>
@@ -911,24 +912,27 @@ function observeMutation() {
                   const activeBoard = app.allBoards.find(
                     (board) => board.state === "active"
                   );
-                  if (target.parentElement.children[0].value === "") return;
-                  const targetColumnObjectIndex = activeBoard.columns.findIndex(
-                    (column) =>
-                      column.colName === target.parentElement.children[0].value
-                  );
+                  if (target.parentElement.children[0].value !== "") {
+                    const targetColumnObjectIndex =
+                      activeBoard.columns.findIndex(
+                        (column) =>
+                          column.colName ===
+                          target.parentElement.children[0].value
+                      );
 
-                  if (
-                    targetColumnObjectIndex !== -1 &&
-                    targetColumnObjectIndex ==
-                      allOldEditableContentSpots.indexOf(target.parentElement)
-                  ) {
-                    activeBoard.columns.splice(targetColumnObjectIndex, 1);
-                    document
-                      .querySelector(
-                        `.board-column[data-name="${target.parentElement.children[0].value}"]`
-                      )
-                      .remove();
-                    interactWithLocalStorage("set");
+                    if (
+                      targetColumnObjectIndex !== -1 &&
+                      targetColumnObjectIndex ==
+                        allOldEditableContentSpots.indexOf(target.parentElement)
+                    ) {
+                      activeBoard.columns.splice(targetColumnObjectIndex, 1);
+                      document
+                        .querySelector(
+                          `.board-column[data-name="${target.parentElement.children[0].value}"]`
+                        )
+                        .remove();
+                      interactWithLocalStorage("set");
+                    }
                   }
                 }
 
@@ -1158,6 +1162,13 @@ function observeMutation() {
                     .querySelectorAll(".column-name")
                     .forEach((columnName, index) => {
                       columnName.childNodes[0].textContent =
+                        targetBoardObject.columns[index].colName;
+                    });
+
+                  document
+                    .querySelectorAll(".board-column")
+                    .forEach((boardColumnElement, index) => {
+                      boardColumnElement.dataset.name =
                         targetBoardObject.columns[index].colName;
                     });
 
