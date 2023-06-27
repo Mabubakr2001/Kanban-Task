@@ -359,11 +359,22 @@
         color: #fff;
       }
     }
-    .cancel-btn {
-      background-color: #fff;
-      color: map-get(c.$colors, main);
-      &:hover {
-        opacity: 0.7;
+    @at-root body[data-mode="dark"] {
+      .cancel-btn {
+        background-color: #fff;
+        color: map-get(c.$colors, main);
+        &:hover {
+          background-color: #c9c9c9 !important;
+        }
+      }
+    }
+    @at-root body[data-mode="light"] {
+      .cancel-btn {
+        color: #fff;
+        background-color: map-get(c.$colors, main);
+        &:hover {
+          background-color: #6957aa !important;
+        }
       }
     }
   }

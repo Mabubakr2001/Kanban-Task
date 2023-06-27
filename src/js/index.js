@@ -608,8 +608,6 @@ function startDragging() {
 
       if (choosenTaskObject == null) return;
 
-      console.log(target.dataset.taskId == choosenTaskObject.taskID);
-
       taskWasDragged = true;
 
       newColumnObject.tasks.splice(newIndex, 0, { ...choosenTaskObject });
@@ -1376,9 +1374,10 @@ function observeMutation() {
               );
               const openedTaskWindow =
                 document.querySelector(".task-info-window");
-              const editTaskBtn = taskManipulationWindow.querySelector(".edit");
+              const editTaskBtn =
+                taskManipulationWindow?.querySelector(".edit");
               const deleteTaskBtn =
-                taskManipulationWindow.querySelector(".delete");
+                taskManipulationWindow?.querySelector(".delete");
               const activeBoard = app.allBoards.find(
                 (board) => board.state === "active"
               );
@@ -1391,7 +1390,7 @@ function observeMutation() {
                 .tasks.find(
                   (task) => task.taskID == openedTaskWindow.dataset.taskId
                 );
-              editTaskBtn.addEventListener("click", () => {
+              editTaskBtn?.addEventListener("click", () => {
                 createMarkup({
                   elementType: "task-edit-window",
                   placeToInsert: "beforeend",
@@ -1404,7 +1403,7 @@ function observeMutation() {
                     openedTaskWindow.children[3].children[1].defaultValue,
                 });
               });
-              deleteTaskBtn.addEventListener("click", () => {
+              deleteTaskBtn?.addEventListener("click", () => {
                 openedTaskWindow.remove();
                 createMarkup({
                   elementType: "deletion-window",
