@@ -40,15 +40,3 @@ npm run build
 ```bash
 npm run dev
 ```
-
-## Feedback
-
-If you have any feedback or suggestions for the game, please feel free to contact me, You can reach me on :
-
-- [Facebook](https://www.facebook.com/mohamed.aboubakr.111)
-
-- [LinkedIn](https://www.linkedin.com/in/moaboubakr2001/)
-
-- [Twitter](https://twitter.com/mabobakr365)
-
-I would love to hear from you and improve the game further. Thank you for playing!
