@@ -10,7 +10,7 @@ You can enjoy the site at <https://kanban-task-46ir.onrender.com/>
 
 ## Credits
 
-This app was created with by [Mohamed Aboubakr](https://www.linkedin.com/in/moaboubakr2001/ "LinkedIn Profile"). It uses the following technologies:
+This app was created by [Mohamed Aboubakr](https://www.linkedin.com/in/moaboubakr2001/ "LinkedIn Profile"). It uses the following technologies:
 
 - HTML
 - SASS
