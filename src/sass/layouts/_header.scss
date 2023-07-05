@@ -21,6 +21,11 @@ header {
     width: rem(245px);
     height: 100%;
     padding-left: rem(20px);
+    @media (300px <= width <= 767px) {
+      & {
+        flex: 1;
+      }
+    }
     @at-root body[data-mode="dark"] & {
       border-right: 1px solid #3e3f4e;
     }
@@ -58,6 +63,34 @@ header {
       h1 {
         font-size: rem(28px);
         font-weight: 700;
+        @media (300px <= width <= 767px) {
+          & {
+            width: fit-content;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+    .open-arrow {
+      display: none;
+    }
+    @media (300px <= width <= 767px) {
+      & {
+        width: rem(220px);
+        border-right: none !important;
+        .open-arrow {
+          display: block;
+          margin: 5px 0 0 10px;
+          pointer-events: all;
+          user-select: all;
+          cursor: pointer;
+          path {
+            pointer-events: none;
+            user-select: none;
+          }
+        }
       }
     }
   }
@@ -66,6 +99,12 @@ header {
     justify-content: space-between;
     align-items: center;
     flex: 1;
+    @media (300px <= width <= 767px) {
+      & {
+        flex: none;
+        width: 40%;
+      }
+    }
     padding: {
       top: 15px;
       bottom: 15px;
@@ -74,6 +113,11 @@ header {
     }
     h2 {
       font-size: rem(22px);
+      // @media (300px <= width <= 767px) {
+      //   & {
+      //     display: none;
+      //   }
+      // }
     }
     .board-manipulation {
       display: flex;

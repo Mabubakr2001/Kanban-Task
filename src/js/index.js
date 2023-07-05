@@ -8,6 +8,8 @@ const boardCreationBtn = document.querySelector(".board-creation-btn");
 const allBoardsSpot = document.querySelector(".all-boards");
 const hint = document.querySelector(".hint");
 const addTaskBtn = document.querySelector(".add-task-btn");
+const openArrow = document.querySelector(".open-arrow");
+const mainTitle = document.querySelector(".title");
 
 const eventsPerformedOnInputs = ["input", "blur", "click"];
 let boardsNum = 0;
@@ -1601,6 +1603,13 @@ window.addEventListener("load", () => {
         boardName: board.boardName,
       });
 
+      // const boardTitle = document.querySelector(".board-title");
+      // if (window.innerWidth < 767) {
+      //   mainTitle.textContent = boardTitle.textContent;
+      // } else {
+      //   mainTitle.textContent = "Kanban";
+      // }
+
       showBoardContent(board);
 
       board.columns.forEach((column) => {
@@ -1705,4 +1714,9 @@ boardCreationBtn.addEventListener("click", ({ target }) => {
     placeToInsert: "beforeend",
   });
   target.blur();
+});
+
+openArrow?.addEventListener("click", () => {
+  boardCreationSpot.dataset.state = "visible";
+  console.log(window.innerWidth);
 });

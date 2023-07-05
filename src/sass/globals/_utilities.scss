@@ -24,6 +24,12 @@
     font-size: rem(18px);
     font-weight: 700;
   }
+
+  @media (300px <= width <= 767px) {
+    h3 {
+      display: none;
+    }
+  }
 }
 
 .window {

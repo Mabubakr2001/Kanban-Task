@@ -20,7 +20,9 @@
 
 .board-creation {
   height: calc(100vh - 77px);
-  width: 0;
+  display: flex;
+  flex-direction: column;
+  width: rem(245px);
   padding: rem(15px) 0;
   overflow: hidden;
   position: sticky;
@@ -40,6 +42,7 @@
     border-top: 1px solid #3e3f4e;
   }
   @at-root body[data-mode="light"] & {
+    background-color: map-get(c.$colors, main_2);
     border-right: 1px solid #e2e2e2;
     border-top: 1px solid #e2e2e2;
   }
@@ -202,6 +205,38 @@
       }
       svg {
         fill: map-get(c.$colors, main_2);
+      }
+    }
+  }
+
+  @media (300px <= width <= 767px) {
+    & {
+      display: none;
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      border-top: none !important;
+      border-right: none !important;
+      border-radius: 10px;
+      .hide-sidebar-btn {
+        display: none;
+      }
+      .dark-mode {
+        margin-bottom: 0 !important;
+      }
+      @at-root &[data-state="visible"] {
+        display: flex;
+        flex-direction: column;
+        width: 75%;
+        height: 350px;
+      }
+      @at-root body[data-mode="dark"] & {
+        box-shadow: none;
+      }
+      @at-root body[data-mode="light"] & {
+        box-shadow: 0 0 3px 0 #9f9f9f;
       }
     }
   }
