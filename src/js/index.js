@@ -1075,12 +1075,17 @@ function observeMutation() {
 
                   document.querySelector(".board-title")?.remove();
 
-                  createMarkup({
-                    elementType: "board-title",
-                    placeToInsert: "afterbegin",
-                    elementToInsertInto: document.querySelector(".board-info"),
-                    boardName: requiredInput.value,
-                  });
+                  if (window.innerWidth < 767) {
+                    mainTitle.textContent = requiredInput.value;
+                  } else {
+                    createMarkup({
+                      elementType: "board-title",
+                      placeToInsert: "afterbegin",
+                      elementToInsertInto:
+                        document.querySelector(".board-info"),
+                      boardName: requiredInput.value,
+                    });
+                  }
 
                   showBoardContent(newBoard);
                   handleBoardContent();
