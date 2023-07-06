@@ -745,8 +745,10 @@ function handleBoardDeletion({ openedWindow, boardID }) {
           );
           nextBoardObject.state = "active";
           nextBoardElement.dataset.state = "active";
+
           document.querySelector(".board-title").textContent =
             nextBoardObject.boardName;
+          mainTitle.textContent = nextBoardObject.boardName;
 
           showBoardContent(nextBoardObject);
 
@@ -782,8 +784,10 @@ function handleBoardDeletion({ openedWindow, boardID }) {
           );
           previousBoardObject.state = "active";
           previousBoardElement.dataset.state = "active";
+
           document.querySelector(".board-title").textContent =
             previousBoardObject.boardName;
+          mainTitle.textContent = previousBoardObject.boardName;
 
           showBoardContent(previousBoardObject);
 
@@ -1698,6 +1702,7 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
 
 hideSidebarBtn.addEventListener("click", () => {
   boardCreationSpot.dataset.state = "hidden";
+  openArrow.dataset.state = "positive";
   createMarkup({
     elementType: "sidebar-btn",
     elementToInsertInto: document.body,
@@ -1753,6 +1758,9 @@ window.addEventListener("resize", () => {
   if (window.innerWidth < 767) {
     document.querySelector(".show-sidebar-btn")?.remove();
     boardTitle.style.display = "none";
+    if (openArrow.dataset.state === "positive") {
+      boardCreationSpot.dataset.state = "hidden";
+    }
   }
   if (window.innerWidth > 767) {
     mainTitle.textContent = "Kanban";
