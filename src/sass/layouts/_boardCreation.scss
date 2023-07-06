@@ -211,7 +211,7 @@
 
   @media (300px <= width <= 767px) {
     & {
-      display: none;
+      // display: none;
       position: absolute;
       top: 80px;
       left: 50%;
@@ -233,7 +233,7 @@
         height: 350px;
       }
       @at-root body[data-mode="dark"] & {
-        box-shadow: none;
+        box-shadow: 0 0 3px 0 #1f1c1c;
       }
       @at-root body[data-mode="light"] & {
         box-shadow: 0 0 3px 0 #9f9f9f;

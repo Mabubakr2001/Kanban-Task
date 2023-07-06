@@ -45,6 +45,13 @@
   transform: translate(-50%, -50%);
   border-radius: 10px;
   z-index: 1000;
+  @media (300px <= width <= 767px) {
+    & {
+      max-width: 90%;
+      // margin: 0 auto !important;
+      padding: rem(30px) rem(20px);
+    }
+  }
   h3 {
     margin-bottom: rem(20px);
   }
@@ -98,6 +105,7 @@
           width: 30px;
           height: 30px;
           cursor: pointer;
+          margin-left: 8px;
         }
       }
       .task-input {
@@ -126,6 +134,7 @@
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: 20;
   background-color: #00000069;
 }
 
@@ -336,6 +345,11 @@
 .task-basic-manipulation {
   top: 110px;
   right: -15%;
+  @media (300px <= width <= 767px) {
+    & {
+      right: -72px;
+    }
+  }
 }
 
 .deletion-window {

@@ -44,7 +44,7 @@ header {
         justify-content: space-between;
         align-items: center;
         height: rem(30px);
-        width: rem(30px);
+        min-width: rem(30px);
         > {
           div {
             height: inherit;
@@ -75,6 +75,14 @@ header {
     }
     .open-arrow {
       display: none;
+      fill: map-get(c.$colors, main);
+      transition: 0.2s;
+      &[data-state="negative"] {
+        transform: rotate(-180deg);
+      }
+      &[data-state="positive"] {
+        transform: rotate(0deg);
+      }
     }
     @media (300px <= width <= 767px) {
       & {
@@ -82,7 +90,7 @@ header {
         border-right: none !important;
         .open-arrow {
           display: block;
-          margin: 5px 0 0 10px;
+          margin: 5px 0 0 7px;
           pointer-events: all;
           user-select: all;
           cursor: pointer;

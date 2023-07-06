@@ -1567,7 +1567,21 @@ addTaskBtn.addEventListener("click", () => {
   });
 });
 
+function dealWithTitles() {
+  const boardTitle = document.querySelector(".board-title");
+  if (window.innerWidth > 767) {
+    mainTitle.textContent = "Kanban";
+    boardTitle.style.display = "block";
+    return;
+  }
+  mainTitle.textContent = boardTitle.textContent;
+  boardTitle.style.display = "none";
+}
+
 window.addEventListener("load", () => {
+  boardCreationSpot.dataset.state =
+    window.innerWidth < 767 ? "hidden" : "visible";
+
   const theAppObjectFromLocalStorage = interactWithLocalStorage("get");
 
   if (theAppObjectFromLocalStorage == null)
@@ -1603,12 +1617,8 @@ window.addEventListener("load", () => {
         boardName: board.boardName,
       });
 
-      // const boardTitle = document.querySelector(".board-title");
-      // if (window.innerWidth < 767) {
-      //   mainTitle.textContent = boardTitle.textContent;
-      // } else {
-      //   mainTitle.textContent = "Kanban";
-      // }
+      dealWithTitles();
+      window.addEventListener("resize", dealWithTitles);
 
       showBoardContent(board);
 
@@ -1652,7 +1662,6 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
   handleBoardContent();
   app.allBoards.forEach((board) => (board.state = "disabled"));
   choosenBoard.state = "active";
-  document.querySelector(".board-title").textContent = choosenBoard.boardName;
   if (choosenBoard.columns.length > 0) {
     choosenBoard.columns.forEach((column) => {
       column.tasks.forEach(({ taskName, taskID, subtasks }) => {
@@ -1675,6 +1684,10 @@ allBoardsSpot.addEventListener("click", ({ target }) => {
     startDragging();
   }
   interactWithLocalStorage("set");
+  document.querySelector(".board-title").textContent = choosenBoard.boardName;
+  window.innerWidth < 767
+    ? (mainTitle.textContent = choosenBoard.boardName)
+    : "Kanban";
 });
 
 hideSidebarBtn.addEventListener("click", () => {
@@ -1717,6 +1730,30 @@ boardCreationBtn.addEventListener("click", ({ target }) => {
 });
 
 openArrow?.addEventListener("click", () => {
-  boardCreationSpot.dataset.state = "visible";
-  console.log(window.innerWidth);
+  if (
+    boardCreationSpot.dataset.state === "hidden" &&
+    openArrow.dataset.state === "positive"
+  ) {
+    boardCreationSpot.dataset.state = "visible";
+    openArrow.dataset.state = "negative";
+  } else {
+    boardCreationSpot.dataset.state = "hidden";
+    openArrow.dataset.state = "positive";
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth < 767) {
+    document.querySelector(".show-sidebar-btn")?.remove();
+    // boardCreationSpot.dataset.state = "hidden";
+    // return;
+  }
+  if (
+    window.innerWidth > 767 &&
+    boardCreationSpot.dataset.state === "hidden" &&
+    document.querySelector(".show-sidebar-btn") == null
+  ) {
+    boardCreationSpot.dataset.state = "visible";
+    openArrow.dataset.state = "positive";
+  }
 });
