@@ -1075,16 +1075,17 @@ function observeMutation() {
 
                   document.querySelector(".board-title")?.remove();
 
+                  createMarkup({
+                    elementType: "board-title",
+                    placeToInsert: "afterbegin",
+                    elementToInsertInto: document.querySelector(".board-info"),
+                    boardName: requiredInput.value,
+                  });
+
                   if (window.innerWidth < 767) {
                     mainTitle.textContent = requiredInput.value;
-                  } else {
-                    createMarkup({
-                      elementType: "board-title",
-                      placeToInsert: "afterbegin",
-                      elementToInsertInto:
-                        document.querySelector(".board-info"),
-                      boardName: requiredInput.value,
-                    });
+                    document.querySelector(".board-title").style.display =
+                      "none";
                   }
 
                   showBoardContent(newBoard);
@@ -1748,10 +1749,14 @@ openArrow?.addEventListener("click", () => {
 });
 
 window.addEventListener("resize", () => {
+  const boardTitle = document.querySelector(".board-title");
   if (window.innerWidth < 767) {
     document.querySelector(".show-sidebar-btn")?.remove();
-    // boardCreationSpot.dataset.state = "hidden";
-    // return;
+    boardTitle.style.display = "none";
+  }
+  if (window.innerWidth > 767) {
+    mainTitle.textContent = "Kanban";
+    boardTitle.style.display = "block";
   }
   if (
     window.innerWidth > 767 &&

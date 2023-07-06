@@ -60,6 +60,12 @@
     min-height: fit-content;
     max-height: rem(400px);
     overflow-y: scroll;
+    @media (300px <= width <= 767px) {
+      & {
+        min-height: fit-content;
+        max-height: rem(150px);
+      }
+    }
     .created-board-name {
       @extend %rounded-shape;
       transition: t.$mainTransition;
