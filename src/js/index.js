@@ -1775,10 +1775,14 @@ window.addEventListener("resize", () => {
     if (openArrow.dataset.state === "positive") {
       boardCreationSpot.dataset.state = "hidden";
     }
-  } else if (window.innerWidth > 767 && boardTitle != null) {
+  }
+
+  if (window.innerWidth > 767 && boardTitle != null) {
     mainTitle.textContent = "Kanban";
     boardTitle.style.display = "block";
-  } else if (
+  }
+
+  if (
     window.innerWidth > 767 &&
     boardCreationSpot.dataset.state === "hidden" &&
     document.querySelector(".show-sidebar-btn") == null

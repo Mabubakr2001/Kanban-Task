@@ -27,8 +27,6 @@
     margin: 0 10px;
     transform: translate(-50%, -50%);
     color: map-get(c.$colors, main);
-    // @at-root body[data-mode="dark"] & {
-    // }
     span {
       color: map-get(c.$colors, main);
       font-weight: 600;
