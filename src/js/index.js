@@ -287,7 +287,7 @@ function createMarkup({
            <input
              type="text"
              value="Choose Column"
-             readonly="true"
+             readonly
              class="task-choosen-column"
            />
            <svg
@@ -342,6 +342,7 @@ function createMarkup({
                         data-state="normal"
                         class="actual-editable-input"
                         value="${subtask.subtaskName}"
+                        readonly
                       />
                       <img src="./assets/images/x-lg.svg" alt="" class="delete-btn" />
                     </div>
@@ -380,7 +381,7 @@ function createMarkup({
            <input
              type="text"
              value="${availableColumn}"
-             readonly="true"
+             readonly
              class="task-choosen-column"
            />
            <svg
@@ -969,6 +970,7 @@ function observeMutation() {
                 elementToInsertInto:
                   openedWindow.querySelector(".editable-input"),
                 placeToInsert: "beforeend",
+                // subtaskState
               });
 
               const allNewEditableContentSpots = openedWindow.querySelectorAll(
@@ -1317,7 +1319,9 @@ function observeMutation() {
                         subtaskName: editableContent.querySelector(
                           ".actual-editable-input"
                         ).value,
-                        subtaskState: editableContent.dataset.state,
+                        subtaskState: editableContent.dataset.state
+                          ? editableContent.dataset.state
+                          : "waiting",
                       };
                     }
                   );
