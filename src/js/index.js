@@ -336,7 +336,7 @@ function createMarkup({
                    .map((subtask) => {
                      subtasksCounter++;
                      return `
-                    <div class="editable-input-content">
+                    <div class="editable-input-content" data-state="${subtask.subtaskState}">
                       <input
                         type="text"
                         data-state="normal"
@@ -497,8 +497,7 @@ function createMarkup({
     case "hint-message":
       element = `
        <p class="hint">
-         There are no columns, click <span>Create New Board</span> on the left
-         side to start!
+           There are no boards. Create new board and then get started!
        </p>
        `;
       break;
@@ -832,6 +831,9 @@ function handleBoardDeletion({ openedWindow, boardID }) {
             placeToInsert: "beforeend",
             elementToInsertInto: document.querySelector(".board-content"),
           });
+          if (window.innerWidth < 767) {
+            mainTitle.textContent = "Kanban";
+          }
         }
       }
       openedWindow.remove();
@@ -1313,7 +1315,7 @@ function observeMutation() {
                         subtaskName: editableContent.querySelector(
                           ".actual-editable-input"
                         ).value,
-                        subtaskState: "waiting",
+                        subtaskState: editableContent.dataset.state,
                       };
                     }
                   );
@@ -1349,8 +1351,10 @@ function observeMutation() {
                       elementToInsertInto: newColumnSpot,
                       taskName: choosenTaskObject.taskName,
                       taskID: choosenTaskObject.taskID,
-                      allSubtasksNum: allOldEditableContentSpots.length,
-                      allDoneSubtasksNum: 0,
+                      allSubtasksNum: choosenTaskObject.subtasks.length,
+                      allDoneSubtasksNum: choosenTaskObject.subtasks.filter(
+                        (subtask) => subtask.subtaskState === "done"
+                      ).length,
                     });
 
                     oldColumnSpot.children[0].children[1].children[0].textContent = ` (${oldColumnObject.tasks.length})`;
@@ -1589,6 +1593,15 @@ function dealWithTitles() {
 }
 
 window.addEventListener("load", () => {
+  // if (app.allBoards.length === 0) {
+  //   if (window.innerWidth < 767) {
+  //     hint.textContent = `There are no columns. Open the dropdown window and then click <span>Create New Board</span>!`;
+  //   } else {
+  //     hint.textContent = `There are no columns, click <span>Create New Board</span> on the left
+  //  side to start!`;
+  //   }
+  // }
+
   boardCreationSpot.dataset.state =
     window.innerWidth < 767 ? "hidden" : "visible";
 
@@ -1755,18 +1768,17 @@ openArrow?.addEventListener("click", () => {
 
 window.addEventListener("resize", () => {
   const boardTitle = document.querySelector(".board-title");
+
   if (window.innerWidth < 767) {
     document.querySelector(".show-sidebar-btn")?.remove();
-    boardTitle.style.display = "none";
+    if (boardTitle != null) boardTitle.style.display = "none";
     if (openArrow.dataset.state === "positive") {
       boardCreationSpot.dataset.state = "hidden";
     }
-  }
-  if (window.innerWidth > 767) {
+  } else if (window.innerWidth > 767 && boardTitle != null) {
     mainTitle.textContent = "Kanban";
     boardTitle.style.display = "block";
-  }
-  if (
+  } else if (
     window.innerWidth > 767 &&
     boardCreationSpot.dataset.state === "hidden" &&
     document.querySelector(".show-sidebar-btn") == null
