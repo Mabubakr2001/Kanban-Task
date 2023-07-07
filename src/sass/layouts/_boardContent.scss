@@ -26,9 +26,9 @@
     left: 50%;
     margin: 0 10px;
     transform: translate(-50%, -50%);
-    @at-root body[data-mode="dark"] & {
-      color: map-get(c.$colors, main_2);
-    }
+    color: map-get(c.$colors, main);
+    // @at-root body[data-mode="dark"] & {
+    // }
     span {
       color: map-get(c.$colors, main);
       font-weight: 600;
