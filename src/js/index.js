@@ -747,7 +747,8 @@ function handleBoardDeletion({ openedWindow, boardID }) {
 
           document.querySelector(".board-title").textContent =
             nextBoardObject.boardName;
-          mainTitle.textContent = nextBoardObject.boardName;
+          if (window.innerWidth < 767)
+            mainTitle.textContent = nextBoardObject.boardName;
 
           showBoardContent(nextBoardObject);
 
@@ -786,7 +787,8 @@ function handleBoardDeletion({ openedWindow, boardID }) {
 
           document.querySelector(".board-title").textContent =
             previousBoardObject.boardName;
-          mainTitle.textContent = previousBoardObject.boardName;
+          if (window.innerWidth < 767)
+            mainTitle.textContent = previousBoardObject.boardName;
 
           showBoardContent(previousBoardObject);
 
@@ -1593,15 +1595,6 @@ function dealWithTitles() {
 }
 
 window.addEventListener("load", () => {
-  // if (app.allBoards.length === 0) {
-  //   if (window.innerWidth < 767) {
-  //     hint.textContent = `There are no columns. Open the dropdown window and then click <span>Create New Board</span>!`;
-  //   } else {
-  //     hint.textContent = `There are no columns, click <span>Create New Board</span> on the left
-  //  side to start!`;
-  //   }
-  // }
-
   boardCreationSpot.dataset.state =
     window.innerWidth < 767 ? "hidden" : "visible";
 
@@ -1771,6 +1764,8 @@ window.addEventListener("resize", () => {
 
   if (window.innerWidth < 767) {
     document.querySelector(".show-sidebar-btn")?.remove();
+    if (app.allBoards.length > 0)
+      mainTitle.textContent = boardTitle.textContent;
     if (boardTitle != null) boardTitle.style.display = "none";
     if (openArrow.dataset.state === "positive") {
       boardCreationSpot.dataset.state = "hidden";
